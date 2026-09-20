@@ -109,6 +109,18 @@ select, input[type="text"], input[type="date"], input[type="number"] {
   font-size: 0.9rem;
 }
 
+/* Pas de flèches d'incrémentation : saisie directe, plus rapide sur mobile */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));

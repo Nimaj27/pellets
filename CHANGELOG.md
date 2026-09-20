@@ -3,6 +3,13 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [1.0.1] - 2026-09-20
+
+### Corrigé
+- Champ « Quantité » de la consommation : suppression des flèches d'incrémentation
+  du champ numérique (qui avançaient de 0,1 en 0,1 et rendaient la saisie pénible).
+  La saisie se fait désormais librement au clavier, sans pas imposé.
+
 ## [1.0.0] - 2026-09-20
 
 ### Ajouté
