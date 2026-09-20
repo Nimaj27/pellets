@@ -4,7 +4,7 @@
   var STORAGE_KEY = "pelletsConsoData_v1";
 
   var defaultState = {
-    settings: { kgPerSack: 15, currency: "€" },
+    settings: { kgPerSack: 15, currency: "€", sacsParPalette: 66, stockAlertKg: 150 },
     purchases: [],
     consumptions: []
   };
@@ -13,16 +13,36 @@
   var chartMonthly = null;
   var chartYearly = null;
 
+  // Ancien format : { sacks, pricePerSack }. Nouveau format : { unit, qty, sacsParPalette, priceInput }.
+  function migratePurchase(p, defaultSacsParPalette) {
+    if (p.unit && typeof p.qty === "number" && typeof p.priceInput === "number") return p;
+    return {
+      id: p.id,
+      date: p.date,
+      unit: "sacs",
+      qty: p.sacks || 0,
+      sacsParPalette: defaultSacsParPalette,
+      kgPerSack: p.kgPerSack || 0,
+      priceInput: p.pricePerSack || 0,
+      note: p.note || ""
+    };
+  }
+
+  function buildState(parsed) {
+    var settings = Object.assign({}, defaultState.settings, (parsed && parsed.settings) || {});
+    var purchases = Array.isArray(parsed && parsed.purchases) ? parsed.purchases : [];
+    return {
+      settings: settings,
+      purchases: purchases.map(function (p) { return migratePurchase(p, settings.sacsParPalette); }),
+      consumptions: Array.isArray(parsed && parsed.consumptions) ? parsed.consumptions : []
+    };
+  }
+
   function loadState() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return clone(defaultState);
-      var parsed = JSON.parse(raw);
-      return {
-        settings: Object.assign({}, defaultState.settings, parsed.settings || {}),
-        purchases: Array.isArray(parsed.purchases) ? parsed.purchases : [],
-        consumptions: Array.isArray(parsed.consumptions) ? parsed.consumptions : []
-      };
+      return buildState(JSON.parse(raw));
     } catch (e) {
       console.error("Impossible de charger les données, réinitialisation.", e);
       return clone(defaultState);
@@ -58,23 +78,38 @@
   });
 
   // ---------- Achats ----------
-  function purchaseKg(p) { return p.sacks * p.kgPerSack; }
-  function purchaseTotal(p) { return p.sacks * p.pricePerSack; }
+  function purchaseSacks(p) { return p.unit === "palette" ? p.qty * p.sacsParPalette : p.qty; }
+  function purchaseKg(p) { return purchaseSacks(p) * p.kgPerSack; }
+  function purchaseTotal(p) { return p.qty * p.priceInput; }
+  function purchaseUnitPricePerSack(p) { return p.unit === "palette" ? p.priceInput / p.sacsParPalette : p.priceInput; }
+
+  function updatePurchaseUnitLabels() {
+    var unit = document.getElementById("purchaseUnit").value;
+    var isPalette = unit === "palette";
+    document.getElementById("purchaseQtyLabel").textContent = isPalette ? "Nombre de palettes" : "Nombre de sacs";
+    document.getElementById("purchasePriceLabel").textContent = isPalette ? "Prix par palette (€)" : "Prix par sac (€)";
+  }
+
+  document.getElementById("purchaseUnit").addEventListener("change", updatePurchaseUnitLabels);
 
   document.getElementById("formPurchase").addEventListener("submit", function (e) {
     e.preventDefault();
     var purchase = {
       id: uid(),
       date: document.getElementById("purchaseDate").value,
-      sacks: parseFloat(document.getElementById("purchaseSacks").value) || 0,
+      unit: document.getElementById("purchaseUnit").value,
+      qty: parseFloat(document.getElementById("purchaseQty").value) || 0,
+      sacsParPalette: state.settings.sacsParPalette,
       kgPerSack: parseFloat(document.getElementById("purchaseKgPerSack").value) || 0,
-      pricePerSack: parseFloat(document.getElementById("purchasePricePerSack").value) || 0,
+      priceInput: parseFloat(document.getElementById("purchasePriceInput").value) || 0,
       note: document.getElementById("purchaseNote").value.trim()
     };
     state.purchases.push(purchase);
     saveState();
     e.target.reset();
+    document.getElementById("purchaseUnit").value = "sacs";
     document.getElementById("purchaseKgPerSack").value = state.settings.kgPerSack;
+    updatePurchaseUnitLabels();
     renderAll();
   });
 
@@ -90,12 +125,15 @@
     var body = document.getElementById("purchasesBody");
     var sorted = state.purchases.slice().sort(function (a, b) { return b.date.localeCompare(a.date); });
     body.innerHTML = sorted.map(function (p) {
+      var achatLabel = p.unit === "palette"
+        ? p.qty + " palette(s) (≈" + purchaseSacks(p) + " sacs)"
+        : p.qty + " sac(s)";
       return "<tr>" +
         "<td>" + p.date + "</td>" +
-        "<td>" + p.sacks + "</td>" +
+        "<td>" + achatLabel + "</td>" +
         "<td>" + p.kgPerSack + "</td>" +
         "<td>" + fmtKg(purchaseKg(p)) + "</td>" +
-        "<td>" + fmtMoney(p.pricePerSack) + "</td>" +
+        "<td>" + fmtMoney(purchaseUnitPricePerSack(p)) + "/sac</td>" +
         "<td>" + fmtMoney(purchaseTotal(p)) + "</td>" +
         "<td>" + (p.note || "") + "</td>" +
         "<td><button class=\"row-delete\" data-delete-purchase=\"" + p.id + "\">Supprimer</button></td>" +
@@ -149,6 +187,8 @@
   document.getElementById("formSettings").addEventListener("submit", function (e) {
     e.preventDefault();
     state.settings.kgPerSack = parseFloat(document.getElementById("settingKgPerSack").value) || 15;
+    state.settings.sacsParPalette = parseFloat(document.getElementById("settingSacsParPalette").value) || 66;
+    state.settings.stockAlertKg = parseFloat(document.getElementById("settingStockAlert").value) || 0;
     state.settings.currency = document.getElementById("settingCurrency").value.trim() || "€";
     saveState();
     renderAll();
@@ -171,11 +211,7 @@
     reader.onload = function () {
       try {
         var imported = JSON.parse(reader.result);
-        state = {
-          settings: Object.assign({}, defaultState.settings, imported.settings || {}),
-          purchases: Array.isArray(imported.purchases) ? imported.purchases : [],
-          consumptions: Array.isArray(imported.consumptions) ? imported.consumptions : []
-        };
+        state = buildState(imported);
         saveState();
         renderAll();
         alert("Import réussi.");
@@ -226,6 +262,21 @@
     return allKg > 0 ? allCost / allKg : 0;
   }
 
+  function isoDateDaysAgo(n) {
+    var d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.toISOString().slice(0, 10);
+  }
+
+  // Rythme actuel = moyenne quotidienne consommée sur les 30 derniers jours.
+  function computeDailyAvgConsumption() {
+    var windowStart = isoDateDaysAgo(29);
+    var recentKg = state.consumptions
+      .filter(function (c) { return c.date >= windowStart; })
+      .reduce(function (s, c) { return s + c.kg; }, 0);
+    return recentKg / 30;
+  }
+
   function renderStats() {
     var yearFilter = document.getElementById("yearFilter").value;
     var purchasesInScope = yearFilter === "all" ? state.purchases : state.purchases.filter(function (p) { return yearOf(p.date) === yearFilter; });
@@ -245,6 +296,32 @@
     document.getElementById("statAvgPrice").textContent = fmtMoney(avgPrice) + "/kg";
     document.getElementById("statConsumedValue").textContent = fmtMoney(consumedValue);
     document.getElementById("statStock").textContent = fmtKg(stock);
+
+    // Autonomie estimée, basée sur le rythme des 30 derniers jours (indépendant du filtre année).
+    var dailyAvg = computeDailyAvgConsumption();
+    var autonomyEl = document.getElementById("statAutonomy");
+    var hintEl = document.getElementById("statAutonomyHint");
+    if (dailyAvg > 0) {
+      var days = Math.max(0, Math.floor(stock / dailyAvg));
+      autonomyEl.textContent = days + " jour" + (days > 1 ? "s" : "");
+      hintEl.textContent = "≈ " + (Math.round((days / 7) * 10) / 10) + " semaines, au rythme actuel";
+    } else {
+      autonomyEl.textContent = "—";
+      hintEl.textContent = "Pas de consommation sur les 30 derniers jours";
+    }
+
+    // Alerte stock bas.
+    var banner = document.getElementById("stockAlertBanner");
+    var stockCard = document.getElementById("statStockCard");
+    if (stock <= state.settings.stockAlertKg) {
+      banner.hidden = false;
+      document.getElementById("stockAlertText").textContent =
+        "il reste environ " + fmtKg(stock) + " (seuil configuré : " + fmtKg(state.settings.stockAlertKg) + "). Pensez à recommander.";
+      stockCard.classList.add("stat-card--warning");
+    } else {
+      banner.hidden = true;
+      stockCard.classList.remove("stat-card--warning");
+    }
   }
 
   var MONTHS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
@@ -307,6 +384,8 @@
 
   function renderSettingsForm() {
     document.getElementById("settingKgPerSack").value = state.settings.kgPerSack;
+    document.getElementById("settingSacsParPalette").value = state.settings.sacsParPalette;
+    document.getElementById("settingStockAlert").value = state.settings.stockAlertKg;
     document.getElementById("settingCurrency").value = state.settings.currency;
     document.getElementById("purchaseKgPerSack").value = state.settings.kgPerSack;
   }
@@ -323,6 +402,7 @@
   var todayStr = new Date().toISOString().slice(0, 10);
   document.getElementById("purchaseDate").value = todayStr;
   document.getElementById("consumptionDate").value = todayStr;
+  updatePurchaseUnitLabels();
 
   renderAll();
 })();

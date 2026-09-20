@@ -3,6 +3,18 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [1.1.0] - 2026-09-20
+
+### Ajouté
+- **Autonomie estimée** sur le tableau de bord : nombre de jours de stock restant,
+  calculé à partir du rythme de consommation des 30 derniers jours.
+- **Alerte stock bas** : bandeau et mise en évidence de la carte « Stock restant »
+  quand le stock passe sous un seuil configurable (Paramètres).
+- **Achats par palette** : possibilité de saisir un achat en nombre de palettes
+  (en plus des sacs à l'unité), avec un réglage « Sacs par palette » dans les
+  Paramètres. Le prix peut être renseigné par sac ou par palette selon l'unité choisie.
+- Migration automatique des achats existants vers le nouveau format (rétrocompatible).
+
 ## [1.0.1] - 2026-09-20
 
 ### Corrigé

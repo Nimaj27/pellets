@@ -32,6 +32,10 @@
       <select id="yearFilter"></select>
     </div>
 
+    <div class="alert-banner" id="stockAlertBanner" hidden>
+      ⚠️ <strong>Stock bas</strong> — <span id="stockAlertText"></span>
+    </div>
+
     <div class="stat-grid">
       <div class="stat-card">
         <span class="stat-card__label">Consommé sur la période</span>
@@ -49,9 +53,14 @@
         <span class="stat-card__label">Valeur du consommé (estimée)</span>
         <span class="stat-card__value" id="statConsumedValue">0 €</span>
       </div>
-      <div class="stat-card stat-card--accent">
+      <div class="stat-card stat-card--accent" id="statStockCard">
         <span class="stat-card__label">Stock restant estimé</span>
         <span class="stat-card__value" id="statStock">0 kg</span>
+      </div>
+      <div class="stat-card" id="statAutonomyCard">
+        <span class="stat-card__label">Autonomie estimée</span>
+        <span class="stat-card__value" id="statAutonomy">—</span>
+        <span class="stat-card__hint" id="statAutonomyHint"></span>
       </div>
     </div>
 
@@ -77,16 +86,23 @@
           <input type="date" id="purchaseDate" required>
         </div>
         <div class="field">
-          <label for="purchaseSacks">Nombre de sacs</label>
-          <input type="number" id="purchaseSacks" min="0" step="1" required>
+          <label for="purchaseUnit">Unité d'achat</label>
+          <select id="purchaseUnit">
+            <option value="sacs">Sacs</option>
+            <option value="palette">Palette(s)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="purchaseQty" id="purchaseQtyLabel">Nombre de sacs</label>
+          <input type="number" id="purchaseQty" min="0" step="any" inputmode="decimal" required>
         </div>
         <div class="field">
           <label for="purchaseKgPerSack">Poids par sac (kg)</label>
           <input type="number" id="purchaseKgPerSack" min="0" step="0.1" required>
         </div>
         <div class="field">
-          <label for="purchasePricePerSack">Prix par sac (€)</label>
-          <input type="number" id="purchasePricePerSack" min="0" step="0.01" required>
+          <label for="purchasePriceInput" id="purchasePriceLabel">Prix par sac (€)</label>
+          <input type="number" id="purchasePriceInput" min="0" step="0.01" required>
         </div>
         <div class="field field--wide">
           <label for="purchaseNote">Note (fournisseur, promo…)</label>
@@ -102,8 +118,8 @@
         <table>
           <thead>
             <tr>
-              <th>Date</th><th>Sacs</th><th>Kg/sac</th><th>Total kg</th>
-              <th>Prix/sac</th><th>Total</th><th>Note</th><th></th>
+              <th>Date</th><th>Achat</th><th>Kg/sac</th><th>Total kg</th>
+              <th>Prix unitaire</th><th>Total</th><th>Note</th><th></th>
             </tr>
           </thead>
           <tbody id="purchasesBody"></tbody>
@@ -165,6 +181,14 @@
           <input type="number" id="settingKgPerSack" min="0" step="0.1">
         </div>
         <div class="field">
+          <label for="settingSacsParPalette">Sacs par palette</label>
+          <input type="number" id="settingSacsParPalette" min="1" step="1">
+        </div>
+        <div class="field">
+          <label for="settingStockAlert">Seuil d'alerte stock bas (kg)</label>
+          <input type="number" id="settingStockAlert" min="0" step="1">
+        </div>
+        <div class="field">
           <label for="settingCurrency">Symbole monétaire</label>
           <input type="text" id="settingCurrency" maxlength="3">
         </div>
@@ -187,7 +211,7 @@
 </main>
 
 <footer class="app-footer">
-  <span>Pellets Conso — v1.0.0</span>
+  <span>Pellets Conso — v1.1.0</span>
   <a href="CHANGELOG.md" target="_blank">Changelog</a>
 </footer>
 

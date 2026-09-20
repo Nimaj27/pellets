@@ -137,6 +137,7 @@ input[type="number"] {
 }
 
 .stat-card--accent { border-color: var(--accent); }
+.stat-card--warning { border-color: var(--danger); }
 
 .stat-card__label {
   display: block;
@@ -150,6 +151,25 @@ input[type="number"] {
   font-size: 1.4rem;
   font-weight: 700;
 }
+
+.stat-card__hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.alert-banner {
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.alert-banner strong { font-weight: 700; }
 
 .chart-grid {
   display: grid;
