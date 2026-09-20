@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pellets Conso — Suivi de consommation</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header__title">
+    <span class="app-header__icon">🔥</span>
+    <div>
+      <h1>Pellets Conso</h1>
+      <p>Suivi de la consommation et du coût de vos pellets, année après année</p>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn is-active" data-tab="dashboard">Tableau de bord</button>
+    <button class="tab-btn" data-tab="purchases">Achats</button>
+    <button class="tab-btn" data-tab="consumptions">Consommation</button>
+    <button class="tab-btn" data-tab="settings">Paramètres</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- TABLEAU DE BORD -->
+  <section id="tab-dashboard" class="tab-panel is-active">
+    <div class="panel-toolbar">
+      <label for="yearFilter">Année</label>
+      <select id="yearFilter"></select>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <span class="stat-card__label">Consommé sur la période</span>
+        <span class="stat-card__value" id="statKgConsumed">0 kg</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Coût des achats sur la période</span>
+        <span class="stat-card__value" id="statCostPurchases">0 €</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Prix moyen au kg</span>
+        <span class="stat-card__value" id="statAvgPrice">0 €/kg</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Valeur du consommé (estimée)</span>
+        <span class="stat-card__value" id="statConsumedValue">0 €</span>
+      </div>
+      <div class="stat-card stat-card--accent">
+        <span class="stat-card__label">Stock restant estimé</span>
+        <span class="stat-card__value" id="statStock">0 kg</span>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h2>Consommation mensuelle (année sélectionnée)</h2>
+        <canvas id="chartMonthly" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h2>Comparaison pluriannuelle</h2>
+        <canvas id="chartYearly" height="220"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACHATS -->
+  <section id="tab-purchases" class="tab-panel">
+    <div class="card">
+      <h2>Ajouter un achat</h2>
+      <form id="formPurchase" class="form-grid">
+        <div class="field">
+          <label for="purchaseDate">Date</label>
+          <input type="date" id="purchaseDate" required>
+        </div>
+        <div class="field">
+          <label for="purchaseSacks">Nombre de sacs</label>
+          <input type="number" id="purchaseSacks" min="0" step="1" required>
+        </div>
+        <div class="field">
+          <label for="purchaseKgPerSack">Poids par sac (kg)</label>
+          <input type="number" id="purchaseKgPerSack" min="0" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="purchasePricePerSack">Prix par sac (€)</label>
+          <input type="number" id="purchasePricePerSack" min="0" step="0.01" required>
+        </div>
+        <div class="field field--wide">
+          <label for="purchaseNote">Note (fournisseur, promo…)</label>
+          <input type="text" id="purchaseNote" placeholder="Optionnel">
+        </div>
+        <button type="submit" class="btn btn--primary">Ajouter l'achat</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Historique des achats</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Sacs</th><th>Kg/sac</th><th>Total kg</th>
+              <th>Prix/sac</th><th>Total</th><th>Note</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="purchasesBody"></tbody>
+        </table>
+      </div>
+      <p class="empty-state" id="purchasesEmpty">Aucun achat enregistré pour le moment.</p>
+    </div>
+  </section>
+
+  <!-- CONSOMMATION -->
+  <section id="tab-consumptions" class="tab-panel">
+    <div class="card">
+      <h2>Ajouter une consommation</h2>
+      <form id="formConsumption" class="form-grid">
+        <div class="field">
+          <label for="consumptionDate">Date</label>
+          <input type="date" id="consumptionDate" required>
+        </div>
+        <div class="field">
+          <label for="consumptionQty">Quantité</label>
+          <input type="number" id="consumptionQty" min="0" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="consumptionUnit">Unité</label>
+          <select id="consumptionUnit">
+            <option value="kg">kg</option>
+            <option value="sacs">sacs</option>
+          </select>
+        </div>
+        <div class="field field--wide">
+          <label for="consumptionNote">Note</label>
+          <input type="text" id="consumptionNote" placeholder="Optionnel">
+        </div>
+        <button type="submit" class="btn btn--primary">Ajouter la consommation</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Historique de consommation</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Quantité (kg)</th><th>Note</th><th></th></tr>
+          </thead>
+          <tbody id="consumptionsBody"></tbody>
+        </table>
+      </div>
+      <p class="empty-state" id="consumptionsEmpty">Aucune consommation enregistrée pour le moment.</p>
+    </div>
+  </section>
+
+  <!-- PARAMETRES -->
+  <section id="tab-settings" class="tab-panel">
+    <div class="card">
+      <h2>Paramètres</h2>
+      <form id="formSettings" class="form-grid">
+        <div class="field">
+          <label for="settingKgPerSack">Poids par sac par défaut (kg)</label>
+          <input type="number" id="settingKgPerSack" min="0" step="0.1">
+        </div>
+        <div class="field">
+          <label for="settingCurrency">Symbole monétaire</label>
+          <input type="text" id="settingCurrency" maxlength="3">
+        </div>
+        <button type="submit" class="btn btn--primary">Enregistrer</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Sauvegarde des données</h2>
+      <p>Les données sont stockées uniquement dans votre navigateur (localStorage). Pensez à exporter régulièrement une sauvegarde.</p>
+      <div class="btn-row">
+        <button id="btnExport" class="btn">Exporter (JSON)</button>
+        <label class="btn" for="importFile">Importer (JSON)</label>
+        <input type="file" id="importFile" accept="application/json" hidden>
+        <button id="btnReset" class="btn btn--danger">Réinitialiser toutes les données</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <span>Pellets Conso — v1.0.0</span>
+  <a href="CHANGELOG.md" target="_blank">Changelog</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
