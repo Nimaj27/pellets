@@ -8,18 +8,27 @@ URL cible une fois déployée : **https://pellets-conso.web.app**
 
 ## Fonctionnalités
 
-- **Achats** : date, nombre de sacs, poids par sac, prix par sac, note.
-- **Consommation** : date, quantité (kg ou sacs), note.
-- **Tableau de bord** (filtrable par année ou sur tout l'historique) :
-  - Total consommé sur la période
-  - Coût total des achats sur la période
-  - Prix moyen au kg (basé sur les achats)
-  - Valeur estimée de ce qui a été consommé
-  - Stock restant estimé (achats cumulés − consommation cumulée)
-  - Graphique de consommation mensuelle
-  - Graphique de comparaison pluriannuelle (consommation vs coût)
-- **Paramètres** : poids par sac par défaut, symbole monétaire.
-- **Sauvegarde** : export / import des données en JSON, réinitialisation.
+Interface façon appli mobile (thème sombre, navigation en bas, bouton flottant),
+avec 4 sections :
+
+- **Dashboard** : dépenses de la période (par saison de chauffe ou depuis
+  toujours), rythme de consommation sur 7 jours, stock restant estimé,
+  autonomie estimée, alerte stock bas, graphique des 7 derniers jours et
+  consommation mensuelle de la saison.
+- **Historique** : achats, brûlages et entretiens dans une liste unique,
+  filtrable par type et groupée par mois.
+- **Statistiques** : évolution mensuelle de la saison (sacs brûlés ou
+  dépenses) et comparaison entre saisons (sacs brûlés vs sacs achetés).
+- **Entretiens** : suivi des opérations de maintenance (Annuel, Régulier,
+  Vitre, Annexes).
+
+Ajout d'une entrée (achat en sacs ou en palettes, brûlage en kg ou en sacs,
+entretien) via un unique bouton **+**. Paramètres (poids par sac, sacs par
+palette, seuil d'alerte, devise) et sauvegarde (export / import JSON,
+réinitialisation) accessibles via l'icône ⚙️.
+
+La saison de chauffe court de septembre à août (ex. « 2026/2027 »), plus
+pertinente qu'une année civile pour ce type de suivi.
 
 ## Structure du projet
 

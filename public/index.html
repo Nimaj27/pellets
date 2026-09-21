@@ -2,34 +2,25 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pellets Conso — Suivi de consommation</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="app-header">
-  <div class="app-header__title">
-    <span class="app-header__icon">🔥</span>
-    <div>
-      <h1>Pellets Conso</h1>
-      <p>Suivi de la consommation et du coût de vos pellets, année après année</p>
-    </div>
-  </div>
-  <nav class="tabs" id="tabs">
-    <button class="tab-btn is-active" data-tab="dashboard">Tableau de bord</button>
-    <button class="tab-btn" data-tab="purchases">Achats</button>
-    <button class="tab-btn" data-tab="consumptions">Consommation</button>
-    <button class="tab-btn" data-tab="settings">Paramètres</button>
-  </nav>
-</header>
+<div class="bg-decor" aria-hidden="true"></div>
 
-<main>
+<div class="app-shell">
 
-  <!-- TABLEAU DE BORD -->
-  <section id="tab-dashboard" class="tab-panel is-active">
-    <div class="panel-toolbar">
-      <label for="yearFilter">Année</label>
-      <select id="yearFilter"></select>
+  <!-- DASHBOARD -->
+  <section id="page-dashboard" class="page is-active">
+    <header class="page-header">
+      <button class="icon-btn" id="btnOpenSettingsDash" aria-label="Paramètres">⚙️</button>
+      <h1>Dashboard <span class="brand">🔥</span></h1>
+      <span></span>
+    </header>
+
+    <div class="season-bar">
+      <select id="dashScopeSelect" class="pill-select"></select>
     </div>
 
     <div class="alert-banner" id="stockAlertBanner" hidden>
@@ -38,182 +29,245 @@
 
     <div class="stat-grid">
       <div class="stat-card">
-        <span class="stat-card__label">Consommé sur la période</span>
-        <span class="stat-card__value" id="statKgConsumed">0 kg</span>
+        <span class="stat-card__label">Dépenses (période)</span>
+        <span class="stat-card__value" id="statSpent">0 €</span>
       </div>
       <div class="stat-card">
-        <span class="stat-card__label">Coût des achats sur la période</span>
-        <span class="stat-card__value" id="statCostPurchases">0 €</span>
+        <span class="stat-card__label">Rythme (7 jours)</span>
+        <span class="stat-card__value" id="statRate">0 kg/j</span>
       </div>
-      <div class="stat-card">
-        <span class="stat-card__label">Prix moyen au kg</span>
-        <span class="stat-card__value" id="statAvgPrice">0 €/kg</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-card__label">Valeur du consommé (estimée)</span>
-        <span class="stat-card__value" id="statConsumedValue">0 €</span>
-      </div>
-      <div class="stat-card stat-card--accent" id="statStockCard">
-        <span class="stat-card__label">Stock restant estimé</span>
+      <div class="stat-card" id="statStockCard">
+        <span class="stat-card__label">Stock restant</span>
         <span class="stat-card__value" id="statStock">0 kg</span>
       </div>
-      <div class="stat-card" id="statAutonomyCard">
+      <div class="stat-card">
         <span class="stat-card__label">Autonomie estimée</span>
         <span class="stat-card__value" id="statAutonomy">—</span>
         <span class="stat-card__hint" id="statAutonomyHint"></span>
       </div>
     </div>
 
-    <div class="chart-grid">
-      <div class="chart-card">
-        <h2>Consommation mensuelle (année sélectionnée)</h2>
-        <canvas id="chartMonthly" height="220"></canvas>
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <h2>7 derniers jours</h2>
+        <span class="chip" id="weekTotalChip">0 sac</span>
       </div>
-      <div class="chart-card">
-        <h2>Comparaison pluriannuelle</h2>
-        <canvas id="chartYearly" height="220"></canvas>
-      </div>
+      <canvas id="chartWeek" height="180"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h2>Consommation mensuelle (saison)</h2>
+      <canvas id="chartMonthly" height="200"></canvas>
     </div>
   </section>
 
-  <!-- ACHATS -->
-  <section id="tab-purchases" class="tab-panel">
-    <div class="card">
-      <h2>Ajouter un achat</h2>
-      <form id="formPurchase" class="form-grid">
+  <!-- HISTORIQUE -->
+  <section id="page-historique" class="page">
+    <header class="page-header">
+      <h1>Historique</h1>
+      <span></span>
+    </header>
+
+    <div class="filter-grid" id="historiqueTypeFilters">
+      <button class="filter-pill is-active" data-type="all">Tous</button>
+      <button class="filter-pill" data-type="achat">🛒 Achat</button>
+      <button class="filter-pill" data-type="brulage">🔥 Brûlage</button>
+      <button class="filter-pill" data-type="entretien">🧹 Entretien</button>
+    </div>
+
+    <div class="chip-row" id="historiqueMaintenanceFilters" hidden>
+      <button class="chip-filter is-active" data-mtype="all">Tous</button>
+      <button class="chip-filter" data-mtype="annuel">Annuel</button>
+      <button class="chip-filter" data-mtype="regulier">Régulier</button>
+      <button class="chip-filter" data-mtype="vitre">Vitre</button>
+      <button class="chip-filter" data-mtype="annexes">Annexes</button>
+    </div>
+
+    <div id="historiqueList"></div>
+    <div class="empty-state-wrap" id="historiqueEmptyWrap" hidden>
+      <p class="empty-state">Aucune donnée</p>
+    </div>
+  </section>
+
+  <!-- STATISTIQUES -->
+  <section id="page-statistiques" class="page">
+    <header class="page-header">
+      <h1>Statistiques</h1>
+      <span></span>
+    </header>
+
+    <div class="season-bar">
+      <select id="statsSeasonSelect" class="pill-select"></select>
+    </div>
+
+    <div class="chart-card">
+      <div class="segmented" id="seasonMetricToggle">
+        <button class="segmented__btn is-active" data-metric="kg">🔥 Sacs brûlés</button>
+        <button class="segmented__btn" data-metric="cost">€ Dépenses</button>
+      </div>
+      <canvas id="chartSeasonMonthly" height="220"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h2 style="margin-bottom:0.6rem">Comparaison entre saisons</h2>
+      <div class="segmented" id="multiSeasonToggle">
+        <button class="segmented__btn is-active" data-metric="burned">🔥 Sacs brûlés</button>
+        <button class="segmented__btn" data-metric="bought">🛍️ Sacs achetés</button>
+      </div>
+      <canvas id="chartMultiSeason" height="220"></canvas>
+    </div>
+  </section>
+
+  <!-- ENTRETIENS -->
+  <section id="page-entretiens" class="page">
+    <header class="page-header">
+      <h1>Entretiens</h1>
+      <span></span>
+    </header>
+
+    <div class="chip-row" id="entretienPageFilters">
+      <button class="chip-filter is-active" data-mtype="all">Tous</button>
+      <button class="chip-filter" data-mtype="annuel">Annuel</button>
+      <button class="chip-filter" data-mtype="regulier">Régulier</button>
+      <button class="chip-filter" data-mtype="vitre">Vitre</button>
+      <button class="chip-filter" data-mtype="annexes">Annexes</button>
+    </div>
+
+    <div id="entretiensList"></div>
+    <div class="empty-state-wrap" id="entretiensEmptyWrap" hidden>
+      <p class="empty-state">Aucune donnée</p>
+    </div>
+  </section>
+
+</div>
+
+<button class="fab" id="fabAdd" aria-label="Ajouter">+</button>
+
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-btn is-active" data-page="dashboard"><span class="nav-btn__icon">▦</span><span>Dashboard</span></button>
+  <button class="nav-btn" data-page="historique"><span class="nav-btn__icon">🕐</span><span>Historique</span></button>
+  <button class="nav-btn" data-page="statistiques"><span class="nav-btn__icon">📊</span><span>Statistiques</span></button>
+  <button class="nav-btn" data-page="entretiens"><span class="nav-btn__icon">🧹</span><span>Entretiens</span></button>
+</nav>
+
+<!-- MODALE : Ajouter une entrée -->
+<div class="modal-overlay" id="addModalOverlay" hidden>
+  <div class="modal">
+    <div class="modal__header">
+      <h2>Ajouter</h2>
+      <button class="icon-btn" id="btnCloseAddModal" aria-label="Fermer">✕</button>
+    </div>
+
+    <div class="segmented" id="addTypeSegmented">
+      <button class="segmented__btn is-active" data-add-type="brulage">🔥 Brûlage</button>
+      <button class="segmented__btn" data-add-type="achat">🛒 Achat</button>
+      <button class="segmented__btn" data-add-type="entretien">🧹 Entretien</button>
+    </div>
+
+    <form id="formAdd">
+      <div class="field">
+        <label for="addDate">Date</label>
+        <input type="date" id="addDate" required>
+      </div>
+
+      <div id="fieldsBrulage" class="form-section">
         <div class="field">
-          <label for="purchaseDate">Date</label>
-          <input type="date" id="purchaseDate" required>
+          <label for="addBrulageQty">Quantité</label>
+          <input type="number" id="addBrulageQty" min="0" step="any" inputmode="decimal">
         </div>
         <div class="field">
-          <label for="purchaseUnit">Unité d'achat</label>
-          <select id="purchaseUnit">
+          <label for="addBrulageUnit">Unité</label>
+          <select id="addBrulageUnit">
+            <option value="kg">kg</option>
+            <option value="sacs">sacs</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="fieldsAchat" class="form-section" hidden>
+        <div class="field">
+          <label for="addAchatUnit">Unité d'achat</label>
+          <select id="addAchatUnit">
             <option value="sacs">Sacs</option>
             <option value="palette">Palette(s)</option>
           </select>
         </div>
         <div class="field">
-          <label for="purchaseQty" id="purchaseQtyLabel">Nombre de sacs</label>
-          <input type="number" id="purchaseQty" min="0" step="any" inputmode="decimal" required>
+          <label for="addAchatQty" id="addAchatQtyLabel">Nombre de sacs</label>
+          <input type="number" id="addAchatQty" min="0" step="any" inputmode="decimal">
         </div>
         <div class="field">
-          <label for="purchaseKgPerSack">Poids par sac (kg)</label>
-          <input type="number" id="purchaseKgPerSack" min="0" step="0.1" required>
+          <label for="addAchatKgPerSack">Poids par sac (kg)</label>
+          <input type="number" id="addAchatKgPerSack" min="0" step="0.1">
         </div>
         <div class="field">
-          <label for="purchasePriceInput" id="purchasePriceLabel">Prix par sac (€)</label>
-          <input type="number" id="purchasePriceInput" min="0" step="0.01" required>
+          <label for="addAchatPrice" id="addAchatPriceLabel">Prix par sac (€)</label>
+          <input type="number" id="addAchatPrice" min="0" step="0.01">
         </div>
-        <div class="field field--wide">
-          <label for="purchaseNote">Note (fournisseur, promo…)</label>
-          <input type="text" id="purchaseNote" placeholder="Optionnel">
-        </div>
-        <button type="submit" class="btn btn--primary">Ajouter l'achat</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <h2>Historique des achats</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th><th>Achat</th><th>Kg/sac</th><th>Total kg</th>
-              <th>Prix unitaire</th><th>Total</th><th>Note</th><th></th>
-            </tr>
-          </thead>
-          <tbody id="purchasesBody"></tbody>
-        </table>
       </div>
-      <p class="empty-state" id="purchasesEmpty">Aucun achat enregistré pour le moment.</p>
-    </div>
-  </section>
 
-  <!-- CONSOMMATION -->
-  <section id="tab-consumptions" class="tab-panel">
-    <div class="card">
-      <h2>Ajouter une consommation</h2>
-      <form id="formConsumption" class="form-grid">
+      <div id="fieldsEntretien" class="form-section" hidden>
         <div class="field">
-          <label for="consumptionDate">Date</label>
-          <input type="date" id="consumptionDate" required>
-        </div>
-        <div class="field">
-          <label for="consumptionQty">Quantité</label>
-          <input type="number" id="consumptionQty" min="0" step="any" inputmode="decimal" required>
-        </div>
-        <div class="field">
-          <label for="consumptionUnit">Unité</label>
-          <select id="consumptionUnit">
-            <option value="kg">kg</option>
-            <option value="sacs">sacs</option>
+          <label for="addEntretienType">Type d'entretien</label>
+          <select id="addEntretienType">
+            <option value="annuel">Annuel</option>
+            <option value="regulier">Régulier</option>
+            <option value="vitre">Vitre</option>
+            <option value="annexes">Annexes</option>
           </select>
         </div>
-        <div class="field field--wide">
-          <label for="consumptionNote">Note</label>
-          <input type="text" id="consumptionNote" placeholder="Optionnel">
-        </div>
-        <button type="submit" class="btn btn--primary">Ajouter la consommation</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <h2>Historique de consommation</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Date</th><th>Quantité (kg)</th><th>Note</th><th></th></tr>
-          </thead>
-          <tbody id="consumptionsBody"></tbody>
-        </table>
       </div>
-      <p class="empty-state" id="consumptionsEmpty">Aucune consommation enregistrée pour le moment.</p>
-    </div>
-  </section>
 
-  <!-- PARAMETRES -->
-  <section id="tab-settings" class="tab-panel">
-    <div class="card">
+      <div class="field">
+        <label for="addNote">Note</label>
+        <input type="text" id="addNote" placeholder="Optionnel">
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--block">Ajouter</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODALE : Paramètres -->
+<div class="modal-overlay" id="settingsModalOverlay" hidden>
+  <div class="modal">
+    <div class="modal__header">
       <h2>Paramètres</h2>
-      <form id="formSettings" class="form-grid">
-        <div class="field">
-          <label for="settingKgPerSack">Poids par sac par défaut (kg)</label>
-          <input type="number" id="settingKgPerSack" min="0" step="0.1">
-        </div>
-        <div class="field">
-          <label for="settingSacsParPalette">Sacs par palette</label>
-          <input type="number" id="settingSacsParPalette" min="1" step="1">
-        </div>
-        <div class="field">
-          <label for="settingStockAlert">Seuil d'alerte stock bas (kg)</label>
-          <input type="number" id="settingStockAlert" min="0" step="1">
-        </div>
-        <div class="field">
-          <label for="settingCurrency">Symbole monétaire</label>
-          <input type="text" id="settingCurrency" maxlength="3">
-        </div>
-        <button type="submit" class="btn btn--primary">Enregistrer</button>
-      </form>
+      <button class="icon-btn" id="btnCloseSettings" aria-label="Fermer">✕</button>
     </div>
 
-    <div class="card">
-      <h2>Sauvegarde des données</h2>
-      <p>Les données sont stockées uniquement dans votre navigateur (localStorage). Pensez à exporter régulièrement une sauvegarde.</p>
-      <div class="btn-row">
-        <button id="btnExport" class="btn">Exporter (JSON)</button>
-        <label class="btn" for="importFile">Importer (JSON)</label>
-        <input type="file" id="importFile" accept="application/json" hidden>
-        <button id="btnReset" class="btn btn--danger">Réinitialiser toutes les données</button>
+    <form id="formSettings">
+      <div class="field">
+        <label for="settingKgPerSack">Poids par sac par défaut (kg)</label>
+        <input type="number" id="settingKgPerSack" min="0" step="0.1">
       </div>
+      <div class="field">
+        <label for="settingSacsParPalette">Sacs par palette</label>
+        <input type="number" id="settingSacsParPalette" min="1" step="1">
+      </div>
+      <div class="field">
+        <label for="settingStockAlert">Seuil d'alerte stock bas (kg)</label>
+        <input type="number" id="settingStockAlert" min="0" step="1">
+      </div>
+      <div class="field">
+        <label for="settingCurrency">Symbole monétaire</label>
+        <input type="text" id="settingCurrency" maxlength="3">
+      </div>
+      <button type="submit" class="btn btn--primary btn--block">Enregistrer</button>
+    </form>
+
+    <p class="section-title">Sauvegarde des données</p>
+    <p class="settings-note">Les données sont stockées uniquement dans votre navigateur (localStorage). Pensez à exporter régulièrement une sauvegarde.</p>
+    <div class="btn-row">
+      <button id="btnExport" class="btn">Exporter (JSON)</button>
+      <label class="btn" for="importFile">Importer (JSON)</label>
+      <input type="file" id="importFile" accept="application/json" hidden>
+      <button id="btnReset" class="btn btn--danger">Réinitialiser toutes les données</button>
     </div>
-  </section>
 
-</main>
-
-<footer class="app-footer">
-  <span>Pellets Conso — v1.1.0</span>
-  <a href="CHANGELOG.md" target="_blank">Changelog</a>
-</footer>
+    <p class="settings-note" style="margin-top:1rem">Pellets Conso — v2.0.0 · <a href="CHANGELOG.md" target="_blank" style="color:inherit">Changelog</a></p>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="js/app.js"></script>
