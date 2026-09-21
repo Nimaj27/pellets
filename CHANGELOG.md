@@ -3,6 +3,33 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.0.0] - 2026-09-21
+
+### Changé (refonte complète, inspirée de l'appli Granulo)
+- **Nouveau thème visuel sombre** avec halos flous en fond, cartes arrondies,
+  façon appli mobile.
+- **Navigation repensée** : barre de navigation fixe en bas d'écran avec
+  4 sections (Dashboard, Historique, Statistiques, Entretiens) et un bouton
+  flottant « + » pour ajouter une entrée (brûlage, achat ou entretien) via
+  une fenêtre modale unique.
+- **Historique unifié** : achats, brûlages et entretiens dans une seule liste
+  filtrable (Tous / Achat / Brûlage / Entretien), groupée par mois et
+  repliable, avec un sous-filtre par type d'entretien.
+- **Nouvel onglet Entretiens** : suivi des opérations de maintenance
+  (Annuel, Régulier, Vitre, Annexes).
+- **Calcul par saison de chauffe** (septembre → août) au lieu de l'année
+  civile, sur le Dashboard et les Statistiques.
+- **Statistiques enrichies** : graphique mensuel de la saison (sacs brûlés ou
+  dépenses, au choix) et comparaison entre saisons (sacs brûlés vs sacs
+  achetés).
+- **Dashboard** : dépenses de la période, rythme de consommation sur 7 jours,
+  graphique des 7 derniers jours, stock restant, autonomie estimée et alerte
+  stock bas — tout est conservé de la v1.1.
+- Paramètres et sauvegarde (export/import/réinitialisation) déplacés dans
+  une fenêtre accessible via l'icône ⚙️ du Dashboard.
+- Toujours 100 % local (localStorage) ; les données existantes sont migrées
+  automatiquement, aucune perte.
+
 ## [1.1.0] - 2026-09-20
 
 ### Ajouté
