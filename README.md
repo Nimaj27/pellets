@@ -73,6 +73,17 @@ Puis ouvrez `http://localhost:8080` (ou le port indiqué).
 
 L'application sera alors accessible sur `https://pellets-conso.web.app`.
 
+### Installer l'application sur mobile (PWA)
+
+Une fois déployée en HTTPS, l'appli est installable comme une appli native :
+sur Chrome/Edge (Android) ou Safari (iOS), ouvrez `https://pellets-conso.web.app`
+puis choisissez **Installer l'application** / **Ajouter à l'écran d'accueil**.
+Elle s'ouvre alors en plein écran avec sa propre icône, et fonctionne aussi
+hors-ligne (grâce au service worker qui met la page en cache).
+
+> Ceci ne fonctionne que servi en HTTPS (ou `localhost`) — pas en ouvrant le
+> fichier `index.html` directement.
+
 ## Données et confidentialité
 
 Aucune donnée n'est envoyée à un serveur : tout est conservé dans le

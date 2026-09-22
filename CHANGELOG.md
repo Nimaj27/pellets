@@ -3,6 +3,17 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.2.0] - 2026-09-22
+
+### Ajouté
+- **Application installable (PWA)** : une fois déployée en HTTPS
+  (`pellets-conso.web.app`), le navigateur mobile propose « Installer
+  l'application » / « Ajouter à l'écran d'accueil ». L'appli s'ouvre alors
+  comme une appli native (icône, plein écran, sans barre d'adresse).
+- **Icône** dédiée (192×192, 512×512, apple-touch-icon).
+- **Fonctionnement hors-ligne** basique via un service worker (cache de
+  la page et de ses ressources).
+
 ## [2.1.1] - 2026-09-22
 
 ### Corrigé
