@@ -4,17 +4,43 @@
   var STORAGE_KEY = "pelletsConsoData_v1";
 
   var defaultState = {
-    settings: { kgPerSack: 15, currency: "€", sacsParPalette: 66, stockAlertKg: 150 },
+    settings: { kgPerSack: 15, currency: "€", sacsParPalette: 66, stockAlertKg: 150, initialStockKg: 0, seasonStartMonth: 9 },
     purchases: [],
     consumptions: [],
     maintenances: []
   };
 
   var MAINTENANCE_LABELS = { annuel: "Annuel", regulier: "Régulier", vitre: "Vitre", annexes: "Annexes" };
-  var SEASON_MONTHS = [9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8];
-  var SEASON_MONTH_LABELS = ["Sept", "Oct", "Nov", "Déc", "Janv", "Févr", "Mars", "Avr", "Mai", "Juin", "Juil", "Août"];
   var WEEKDAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
   var MONTH_NAMES_FULL = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+  var MONTH_NAMES_SHORT = ["Janv", "Févr", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"];
+
+  var CHANGELOG = [
+    { version: "2.1.0", date: "22/09/2026", items: [
+      "Stock initial configurable (report de la saison précédente) dans les Paramètres.",
+      "Stock restant affiché aussi en nombre de sacs, pas seulement en kg.",
+      "Dépenses : le coût des entretiens (ramonage, etc.) s'additionne à celui des achats.",
+      "Ajout rapide d'un brûlage : quantité pré-remplie à 1 sac.",
+      "Saison de chauffe : le mois de début est configurable dans les Paramètres.",
+      "Changelog consultable directement dans l'application (le lien vers le fichier ne fonctionnait pas)."
+    ] },
+    { version: "2.0.0", date: "21/09/2026", items: [
+      "Refonte visuelle façon appli mobile (thème sombre, navigation en bas, bouton +).",
+      "Historique unifié (achats, brûlages, entretiens) filtrable et groupé par mois.",
+      "Nouvel onglet Entretiens (maintenance : annuel, régulier, vitre, annexes).",
+      "Calcul par saison de chauffe (sept. → août) sur le Dashboard et les Statistiques.",
+      "Statistiques enrichies : évolution mensuelle et comparaison entre saisons."
+    ] },
+    { version: "1.1.0", date: "20/09/2026", items: [
+      "Autonomie estimée, alerte stock bas, achats saisis par palette."
+    ] },
+    { version: "1.0.1", date: "20/09/2026", items: [
+      "Correction de la saisie de la quantité consommée (flèches 0,1 en 0,1)."
+    ] },
+    { version: "1.0.0", date: "20/09/2026", items: [
+      "Première version : achats, consommation, tableau de bord, export/import."
+    ] }
+  ];
 
   var state = loadState();
   var charts = {};
@@ -70,16 +96,24 @@
     return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
   }
 
+  function seasonStartMonth() { return state.settings.seasonStartMonth || 9; }
+  function getSeasonMonths() {
+    var start = seasonStartMonth(), months = [];
+    for (var i = 0; i < 12; i++) months.push(((start - 1 + i) % 12) + 1);
+    return months;
+  }
+  function getSeasonMonthLabels() { return getSeasonMonths().map(function (m) { return MONTH_NAMES_SHORT[m - 1]; }); }
+
   function seasonStartYear(dateStr) {
     var m = parseInt(dateStr.slice(5, 7), 10), y = parseInt(dateStr.slice(0, 4), 10);
-    return m >= 9 ? y : y - 1;
+    return m >= seasonStartMonth() ? y : y - 1;
   }
   function seasonLabel(startYear) { return startYear + "/" + (startYear + 1); }
   function currentSeasonStartYear() {
     var now = new Date(), m = now.getMonth() + 1, y = now.getFullYear();
-    return m >= 9 ? y : y - 1;
+    return m >= seasonStartMonth() ? y : y - 1;
   }
-  function seasonMonthIndex(dateStr) { return SEASON_MONTHS.indexOf(parseInt(dateStr.slice(5, 7), 10)); }
+  function seasonMonthIndex(dateStr) { return getSeasonMonths().indexOf(parseInt(dateStr.slice(5, 7), 10)); }
 
   function allSeasonStartYears() {
     var years = {};
@@ -122,6 +156,12 @@
     return allKg > 0 ? allCost / allKg : 0;
   }
 
+  function computeStockKg() {
+    var totalKgPurchased = state.purchases.reduce(function (s, p) { return s + purchaseKg(p); }, 0);
+    var totalKgConsumed = state.consumptions.reduce(function (s, c) { return s + c.kg; }, 0);
+    return (state.settings.initialStockKg || 0) + totalKgPurchased - totalKgConsumed;
+  }
+
   function computeDailyAvgConsumption() {
     var windowStart = isoDateDaysAgo(29);
     var recentKg = state.consumptions.filter(function (c) { return c.date >= windowStart; })
@@ -148,6 +188,11 @@
   var addModal = document.getElementById("addModalOverlay");
   var currentAddType = "brulage";
 
+  function prefillBrulageDefaults() {
+    document.getElementById("addBrulageQty").value = "1";
+    document.getElementById("addBrulageUnit").value = "sacs";
+  }
+
   function openAddModal() {
     currentAddType = currentPageName() === "entretiens" ? "entretien" : "brulage";
     document.querySelectorAll("#addTypeSegmented .segmented__btn").forEach(function (b) {
@@ -157,6 +202,7 @@
     document.getElementById("formAdd").reset();
     document.getElementById("addDate").value = todayISO();
     document.getElementById("addAchatKgPerSack").value = state.settings.kgPerSack;
+    if (currentAddType === "brulage") prefillBrulageDefaults();
     updateAchatUnitLabels();
     addModal.hidden = false;
   }
@@ -180,6 +226,7 @@
       b.classList.toggle("is-active", b === btn);
     });
     updateAddFieldsVisibility();
+    if (currentAddType === "brulage") prefillBrulageDefaults();
   });
 
   function updateAchatUnitLabels() {
@@ -213,6 +260,7 @@
       state.maintenances.push({
         id: uid(), date: date,
         type: document.getElementById("addEntretienType").value,
+        cost: parseFloat(document.getElementById("addEntretienCost").value) || 0,
         note: note
       });
     }
@@ -227,7 +275,9 @@
   function openSettingsModal() {
     document.getElementById("settingKgPerSack").value = state.settings.kgPerSack;
     document.getElementById("settingSacsParPalette").value = state.settings.sacsParPalette;
+    document.getElementById("settingInitialStock").value = state.settings.initialStockKg;
     document.getElementById("settingStockAlert").value = state.settings.stockAlertKg;
+    document.getElementById("settingSeasonStartMonth").value = state.settings.seasonStartMonth;
     document.getElementById("settingCurrency").value = state.settings.currency;
     settingsModal.hidden = false;
   }
@@ -239,12 +289,27 @@
     e.preventDefault();
     state.settings.kgPerSack = parseFloat(document.getElementById("settingKgPerSack").value) || 15;
     state.settings.sacsParPalette = parseFloat(document.getElementById("settingSacsParPalette").value) || 66;
+    state.settings.initialStockKg = parseFloat(document.getElementById("settingInitialStock").value) || 0;
     state.settings.stockAlertKg = parseFloat(document.getElementById("settingStockAlert").value) || 0;
+    state.settings.seasonStartMonth = parseInt(document.getElementById("settingSeasonStartMonth").value, 10) || 9;
     state.settings.currency = document.getElementById("settingCurrency").value.trim() || "€";
     saveState();
     settingsModal.hidden = true;
     renderAll();
   });
+
+  // ---------- Modale : Changelog ----------
+  var changelogModal = document.getElementById("changelogModalOverlay");
+  document.getElementById("btnOpenChangelog").addEventListener("click", function (e) {
+    e.preventDefault();
+    document.getElementById("changelogContent").innerHTML = CHANGELOG.map(function (entry) {
+      return "<div class=\"changelog-entry\"><h3>v" + entry.version + "</h3><time>" + entry.date + "</time>" +
+        "<ul>" + entry.items.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul></div>";
+    }).join("");
+    changelogModal.hidden = false;
+  });
+  document.getElementById("btnCloseChangelog").addEventListener("click", function () { changelogModal.hidden = true; });
+  changelogModal.addEventListener("click", function (e) { if (e.target === changelogModal) changelogModal.hidden = true; });
 
   document.getElementById("btnExport").addEventListener("click", function () {
     var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
@@ -328,16 +393,16 @@
   }
 
   function summarizeGroup(entries) {
-    var kgSum = 0, achatCount = 0, achatTotal = 0, entretienCount = 0;
+    var kgSum = 0, achatCount = 0, achatTotal = 0, entretienCount = 0, entretienCost = 0;
     entries.forEach(function (e) {
       if (e.type === "brulage") kgSum += e.kg;
       else if (e.type === "achat") { achatCount++; achatTotal += purchaseTotal(e); }
-      else if (e.type === "entretien") entretienCount++;
+      else if (e.type === "entretien") { entretienCount++; entretienCost += e.cost || 0; }
     });
     var parts = [];
     if (kgSum > 0) parts.push("🔥 " + fmtSacs(kgSum) + " sac(s) - " + fmtKg(kgSum));
     if (achatCount > 0) parts.push("🛒 " + fmtMoney(achatTotal));
-    if (entretienCount > 0) parts.push("🧹 " + entretienCount + " entretien(s)");
+    if (entretienCount > 0) parts.push("🧹 " + entretienCount + " entretien(s)" + (entretienCost > 0 ? " - " + fmtMoney(entretienCost) : ""));
     return parts.join(" · ");
   }
 
@@ -351,7 +416,7 @@
       value = fmtMoney(purchaseTotal(e));
     } else {
       label = humanizeDate(e.date) + " — " + (MAINTENANCE_LABELS[e.type] || e.type);
-      value = "";
+      value = e.cost > 0 ? fmtMoney(e.cost) : "";
     }
     var icon = e.type === "brulage" ? "🔥" : e.type === "achat" ? "🛒" : "🧹";
     return "<div class=\"entry-row entry-row--" + e.type + "\">" +
@@ -456,14 +521,15 @@
   function renderDashboard() {
     var scope = getDashScope();
     var purchasesInScope = scope.mode === "all" ? state.purchases : state.purchases.filter(function (p) { return seasonStartYear(p.date) === scope.startYear; });
+    var maintenancesInScope = scope.mode === "all" ? state.maintenances : state.maintenances.filter(function (m) { return seasonStartYear(m.date) === scope.startYear; });
 
-    var totalSpent = purchasesInScope.reduce(function (s, p) { return s + purchaseTotal(p); }, 0);
+    var totalSpent = purchasesInScope.reduce(function (s, p) { return s + purchaseTotal(p); }, 0) +
+      maintenancesInScope.reduce(function (s, m) { return s + (m.cost || 0); }, 0);
     document.getElementById("statSpent").textContent = fmtMoney(totalSpent);
 
-    var totalKgPurchasedAllTime = state.purchases.reduce(function (s, p) { return s + purchaseKg(p); }, 0);
-    var totalKgConsumedAllTime = state.consumptions.reduce(function (s, c) { return s + c.kg; }, 0);
-    var stock = totalKgPurchasedAllTime - totalKgConsumedAllTime;
+    var stock = computeStockKg();
     document.getElementById("statStock").textContent = fmtKg(stock);
+    document.getElementById("statStockHint").textContent = "≈ " + fmtSacs(stock) + " sac(s)";
 
     var dailyAvg = computeDailyAvgConsumption();
     var autonomyEl = document.getElementById("statAutonomy");
@@ -510,7 +576,7 @@
     state.consumptions.forEach(function (c) {
       if (seasonStartYear(c.date) === seasonForChart) monthlyData[seasonMonthIndex(c.date)] += c.kg;
     });
-    renderChart("chartMonthly", "bar", SEASON_MONTH_LABELS, [{ label: "Kg brûlés (" + seasonLabel(seasonForChart) + ")", data: monthlyData, backgroundColor: "#ff8a3d" }]);
+    renderChart("chartMonthly", "bar", getSeasonMonthLabels(), [{ label: "Kg brûlés (" + seasonLabel(seasonForChart) + ")", data: monthlyData, backgroundColor: "#ff8a3d" }]);
   }
 
   // ---------- Statistiques ----------
@@ -553,12 +619,12 @@
         if (seasonStartYear(c.date) === startYear) monthlyData[seasonMonthIndex(c.date)] += c.kg / (state.settings.kgPerSack || 1);
       });
       monthlyData = monthlyData.map(function (v) { return Math.round(v * 10) / 10; });
-      renderChart("chartSeasonMonthly", "bar", SEASON_MONTH_LABELS, [{ label: "Sacs brûlés", data: monthlyData, backgroundColor: "#ff8a3d" }]);
+      renderChart("chartSeasonMonthly", "bar", getSeasonMonthLabels(), [{ label: "Sacs brûlés", data: monthlyData, backgroundColor: "#ff8a3d" }]);
     } else {
       state.purchases.forEach(function (p) {
         if (seasonStartYear(p.date) === startYear) monthlyData[seasonMonthIndex(p.date)] += purchaseTotal(p);
       });
-      renderChart("chartSeasonMonthly", "bar", SEASON_MONTH_LABELS, [{ label: "Dépenses (" + state.settings.currency + ")", data: monthlyData, backgroundColor: "#5b7cfa" }]);
+      renderChart("chartSeasonMonthly", "bar", getSeasonMonthLabels(), [{ label: "Dépenses (" + state.settings.currency + ")", data: monthlyData, backgroundColor: "#5b7cfa" }]);
     }
 
     var seasons = allSeasonStartYears();
