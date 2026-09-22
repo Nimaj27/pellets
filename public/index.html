@@ -535,6 +535,11 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         <span class="stat-card__value" id="statAutonomy">—</span>
         <span class="stat-card__hint" id="statAutonomyHint"></span>
       </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Prix moyen du sac</span>
+        <span class="stat-card__value" id="statAvgPriceSack">—</span>
+        <span class="stat-card__hint" id="statAvgPriceHint"></span>
+      </div>
     </div>
 
     <div class="chart-card">
@@ -684,7 +689,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         </div>
         <div class="field">
           <label for="addAchatQty" id="addAchatQtyLabel">Nombre de sacs</label>
-          <input type="number" id="addAchatQty" min="0" step="any" inputmode="decimal">
+          <input type="number" id="addAchatQty" min="0" step="any" inputmode="decimal" required>
         </div>
         <div class="field">
           <label for="addAchatKgPerSack">Poids par sac (kg)</label>
@@ -692,7 +697,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         </div>
         <div class="field">
           <label for="addAchatPrice" id="addAchatPriceLabel">Prix par sac (€)</label>
-          <input type="number" id="addAchatPrice" min="0" step="0.01">
+          <input type="number" id="addAchatPrice" min="0" step="0.01" required>
         </div>
       </div>
 
@@ -1209,10 +1214,12 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   }
 
   function entryRowHtml(e) {
-    var label, value, note = e.note || "";
+    var label, value, note = e.note || "", costNote = "";
     if (e.type === "brulage") {
       label = humanizeDate(e.date);
       value = fmtSacs(e.kg) + " sac(s) (" + fmtKg(e.kg) + ")";
+      var avgKgPrice = computeAvgPricePerKg(state.purchases);
+      if (avgKgPrice > 0) costNote = "≈ " + fmtMoney(e.kg * avgKgPrice) + " (au prix moyen du sac)";
     } else if (e.type === "achat") {
       label = humanizeDate(e.date) + " — " + (e.unit === "palette" ? e.qty + " palette(s)" : e.qty + " sac(s)");
       value = fmtMoney(purchaseTotal(e));
@@ -1226,6 +1233,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       "<span class=\"entry-row__icon\">" + icon + "</span>" +
       "<div class=\"entry-row__text\"><div class=\"entry-row__label\">" + label + "</div>" +
       (note ? "<div class=\"entry-row__note\">" + note + "</div>" : "") +
+      (costNote ? "<div class=\"entry-row__note\">" + costNote + "</div>" : "") +
       "</div></div>" +
       "<div class=\"entry-row__right\">" +
       "<span class=\"entry-row__value\">" + value + "</span>" +
@@ -1328,6 +1336,17 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     var totalSpent = purchasesInScope.reduce(function (s, p) { return s + purchaseTotal(p); }, 0) +
       maintenancesInScope.reduce(function (s, m) { return s + (m.cost || 0); }, 0);
     document.getElementById("statSpent").textContent = fmtMoney(totalSpent);
+
+    var avgPricePerKg = computeAvgPricePerKg(purchasesInScope);
+    var avgPriceSackEl = document.getElementById("statAvgPriceSack");
+    var avgPriceHintEl = document.getElementById("statAvgPriceHint");
+    if (avgPricePerKg > 0) {
+      avgPriceSackEl.textContent = fmtMoney(avgPricePerKg * state.settings.kgPerSack);
+      avgPriceHintEl.textContent = fmtMoney(avgPricePerKg) + "/kg";
+    } else {
+      avgPriceSackEl.textContent = "—";
+      avgPriceHintEl.textContent = "Aucun achat renseigné";
+    }
 
     var stock = computeStockKg();
     document.getElementById("statStock").textContent = fmtKg(stock);

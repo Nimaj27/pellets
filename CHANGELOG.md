@@ -3,6 +3,18 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.2.1] - 2026-09-22
+
+### Ajouté
+- **Prix moyen du sac** sur le Dashboard : coût moyen basé sur l'historique
+  des achats de la période sélectionnée.
+- **Coût estimé affiché sur chaque brûlage** dans l'Historique (au prix
+  moyen du sac), pour savoir combien coûte chaque sac utilisé.
+
+### Corrigé
+- Le prix (achat) est désormais un champ obligatoire, pour éviter de
+  saisir un achat à 0 € par oubli (ce qui fausse le prix moyen calculé).
+
 ## [2.2.0] - 2026-09-22
 
 ### Ajouté
