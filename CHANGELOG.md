@@ -3,6 +3,17 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.1.1] - 2026-09-22
+
+### Corrigé
+- Page blanche/sans style quand `index.html` est ouvert directement depuis
+  un gestionnaire de fichiers Android (URI `content://`) : les fichiers
+  liés en chemin relatif (`css/style.css`, `js/app.js`) ne se chargeaient
+  pas dans ce contexte. L'application est désormais un **fichier HTML
+  unique et autonome** (CSS et JS intégrés) : elle fonctionne quelle que
+  soit la façon dont elle est ouverte (double-clic, gestionnaire de
+  fichiers, serveur local, Firebase Hosting).
+
 ## [2.1.0] - 2026-09-22
 
 ### Ajouté

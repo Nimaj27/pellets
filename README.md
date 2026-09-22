@@ -2,7 +2,7 @@
 
 Application de suivi de la consommation et du coût des pellets (granulés de bois), sur une base annuelle et pluriannuelle.
 
-Application 100% statique (HTML / CSS / JavaScript), sans backend. Toutes les données sont stockées localement dans le navigateur (`localStorage`).
+Application 100% statique, un **fichier HTML unique et autonome** (CSS et JS intégrés, sans backend). Toutes les données sont stockées localement dans le navigateur (`localStorage`). Fonctionne aussi bien hébergée que copiée/dézippée et ouverte directement (double-clic), y compris depuis un gestionnaire de fichiers mobile.
 
 URL cible une fois déployée : **https://pellets-conso.web.app**
 
@@ -34,9 +34,7 @@ pertinente qu'une année civile pour ce type de suivi.
 
 ```
 public/
-  index.html
-  css/style.css
-  js/app.js
+  index.html   (page unique, CSS et JS inclus)
 firebase.json
 .firebaserc
 CHANGELOG.md
@@ -44,7 +42,9 @@ CHANGELOG.md
 
 ## Développement local
 
-Aucune dépendance ni build requis. Servez simplement le dossier `public/` :
+Aucune dépendance ni build requis : `public/index.html` est un fichier
+autonome. Ouvrez-le directement dans un navigateur (double-clic), ou
+servez le dossier `public/` :
 
 ```bash
 npx serve public
