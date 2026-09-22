@@ -462,6 +462,12 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
 .settings-note { font-size: 0.85rem; color: var(--text-muted); margin: 0.6rem 0; }
 
+.changelog-entry { margin-bottom: 1.2rem; }
+.changelog-entry h3 { margin: 0 0 0.3rem; font-size: 1rem; }
+.changelog-entry time { font-size: 0.78rem; color: var(--text-muted); }
+.changelog-entry ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+.changelog-entry li { font-size: 0.88rem; margin-bottom: 0.3rem; color: var(--text); }
+
 .section-title {
   font-size: 0.85rem;
   color: var(--text-muted);

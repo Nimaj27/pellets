@@ -3,6 +3,27 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.1.0] - 2026-09-22
+
+### Ajouté
+- **Stock initial** configurable dans les Paramètres (report du stock restant
+  d'une saison précédente à l'initialisation).
+- **Stock restant** affiché aussi en nombre de sacs, en plus des kg.
+- **Coût des entretiens** (ramonage, etc.) : un champ optionnel permet de le
+  renseigner, et il s'additionne désormais aux achats dans les « Dépenses ».
+- **Saison de chauffe configurable** : le mois de début (par défaut
+  septembre) se règle dans les Paramètres, pour s'adapter à chacun.
+- **Changelog consultable dans l'application** (bouton dans Paramètres).
+
+### Modifié
+- Ajout rapide d'un brûlage : le formulaire pré-remplit désormais 1 sac par
+  défaut, pour valider en un geste après avoir rechargé le poêle.
+
+### Corrigé
+- Le lien « Changelog » dans les Paramètres ne fonctionnait pas (le fichier
+  `CHANGELOG.md` n'était pas servi par l'application) — remplacé par une
+  fenêtre affichant le contenu directement.
+
 ## [2.0.0] - 2026-09-21
 
 ### Changé (refonte complète, inspirée de l'appli Granulo)

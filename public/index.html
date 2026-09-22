@@ -39,6 +39,7 @@
       <div class="stat-card" id="statStockCard">
         <span class="stat-card__label">Stock restant</span>
         <span class="stat-card__value" id="statStock">0 kg</span>
+        <span class="stat-card__hint" id="statStockHint"></span>
       </div>
       <div class="stat-card">
         <span class="stat-card__label">Autonomie estimée</span>
@@ -216,6 +217,10 @@
             <option value="annexes">Annexes</option>
           </select>
         </div>
+        <div class="field">
+          <label for="addEntretienCost">Coût (€)</label>
+          <input type="number" id="addEntretienCost" min="0" step="0.01" placeholder="Optionnel">
+        </div>
       </div>
 
       <div class="field">
@@ -246,8 +251,29 @@
         <input type="number" id="settingSacsParPalette" min="1" step="1">
       </div>
       <div class="field">
+        <label for="settingInitialStock">Stock initial (kg, report de la saison précédente)</label>
+        <input type="number" id="settingInitialStock" min="0" step="1">
+      </div>
+      <div class="field">
         <label for="settingStockAlert">Seuil d'alerte stock bas (kg)</label>
         <input type="number" id="settingStockAlert" min="0" step="1">
+      </div>
+      <div class="field">
+        <label for="settingSeasonStartMonth">Mois de début de la saison de chauffe</label>
+        <select id="settingSeasonStartMonth">
+          <option value="1">Janvier</option>
+          <option value="2">Février</option>
+          <option value="3">Mars</option>
+          <option value="4">Avril</option>
+          <option value="5">Mai</option>
+          <option value="6">Juin</option>
+          <option value="7">Juillet</option>
+          <option value="8">Août</option>
+          <option value="9">Septembre</option>
+          <option value="10">Octobre</option>
+          <option value="11">Novembre</option>
+          <option value="12">Décembre</option>
+        </select>
       </div>
       <div class="field">
         <label for="settingCurrency">Symbole monétaire</label>
@@ -265,7 +291,18 @@
       <button id="btnReset" class="btn btn--danger">Réinitialiser toutes les données</button>
     </div>
 
-    <p class="settings-note" style="margin-top:1rem">Pellets Conso — v2.0.0 · <a href="CHANGELOG.md" target="_blank" style="color:inherit">Changelog</a></p>
+    <p class="settings-note" style="margin-top:1rem">Pellets Conso — v2.1.0 · <button id="btnOpenChangelog" class="btn" style="padding:0.2rem 0.6rem;font-size:0.8rem">Changelog</button></p>
+  </div>
+</div>
+
+<!-- MODALE : Changelog -->
+<div class="modal-overlay" id="changelogModalOverlay" hidden>
+  <div class="modal">
+    <div class="modal__header">
+      <h2>Changelog</h2>
+      <button class="icon-btn" id="btnCloseChangelog" aria-label="Fermer">✕</button>
+    </div>
+    <div id="changelogContent"></div>
   </div>
 </div>
 
