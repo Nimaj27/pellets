@@ -285,6 +285,7 @@ body {
 }
 
 .segmented__btn.is-active { background: var(--accent-purchase); color: #06102b; }
+.segmented.is-disabled { opacity: 0.5; pointer-events: none; }
 
 /* ---------- Historique / listes groupées ---------- */
 .month-group {
@@ -321,9 +322,10 @@ body {
   border-radius: var(--radius-md);
   padding: 0.8rem 0.9rem;
   margin: 0.35rem 0;
+  cursor: pointer;
 }
 
-.entry-row--burn { border-color: color-mix(in srgb, var(--accent-burn) 45%, transparent); }
+.entry-row--brulage { border-color: color-mix(in srgb, var(--accent-burn) 45%, transparent); }
 .entry-row--achat { border-color: color-mix(in srgb, var(--accent-purchase) 45%, transparent); }
 .entry-row--entretien { border-color: color-mix(in srgb, var(--accent-maintenance) 45%, transparent); }
 
@@ -649,7 +651,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 <div class="modal-overlay" id="addModalOverlay" hidden>
   <div class="modal">
     <div class="modal__header">
-      <h2>Ajouter</h2>
+      <h2 id="addModalTitle">Ajouter</h2>
       <button class="icon-btn" id="btnCloseAddModal" aria-label="Fermer">✕</button>
     </div>
 
@@ -689,7 +691,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         </div>
         <div class="field">
           <label for="addAchatQty" id="addAchatQtyLabel">Nombre de sacs</label>
-          <input type="number" id="addAchatQty" min="0" step="any" inputmode="decimal" required>
+          <input type="number" id="addAchatQty" min="0" step="any" inputmode="decimal">
         </div>
         <div class="field">
           <label for="addAchatKgPerSack">Poids par sac (kg)</label>
@@ -697,7 +699,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         </div>
         <div class="field">
           <label for="addAchatPrice" id="addAchatPriceLabel">Prix par sac (€)</label>
-          <input type="number" id="addAchatPrice" min="0" step="0.01" required>
+          <input type="number" id="addAchatPrice" min="0" step="0.01">
         </div>
       </div>
 
@@ -722,7 +724,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         <input type="text" id="addNote" placeholder="Optionnel">
       </div>
 
-      <button type="submit" class="btn btn--primary btn--block">Ajouter</button>
+      <button type="submit" class="btn btn--primary btn--block" id="btnSubmitAdd">Ajouter</button>
     </form>
   </div>
 </div>
@@ -991,16 +993,29 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     return active ? active.dataset.page : "dashboard";
   }
 
-  // ---------- Modale : Ajouter ----------
+  // ---------- Modale : Ajouter / Modifier ----------
   var addModal = document.getElementById("addModalOverlay");
   var currentAddType = "brulage";
+  var editingEntry = null; // { type, id } quand on modifie une saisie existante
 
   function prefillBrulageDefaults() {
     document.getElementById("addBrulageQty").value = "1";
     document.getElementById("addBrulageUnit").value = "sacs";
   }
 
+  function findEntryByTypeId(type, id) {
+    var arr = type === "achat" ? state.purchases : type === "brulage" ? state.consumptions : state.maintenances;
+    return arr.filter(function (x) { return x.id === id; })[0];
+  }
+
+  function setAddModalMode(mode) {
+    document.getElementById("addModalTitle").textContent = mode === "edit" ? "Modifier" : "Ajouter";
+    document.getElementById("btnSubmitAdd").textContent = mode === "edit" ? "Modifier" : "Ajouter";
+    document.getElementById("addTypeSegmented").classList.toggle("is-disabled", mode === "edit");
+  }
+
   function openAddModal() {
+    editingEntry = null;
     currentAddType = currentPageName() === "entretiens" ? "entretien" : "brulage";
     document.querySelectorAll("#addTypeSegmented .segmented__btn").forEach(function (b) {
       b.classList.toggle("is-active", b.dataset.addType === currentAddType);
@@ -1011,9 +1026,43 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     document.getElementById("addAchatKgPerSack").value = state.settings.kgPerSack;
     if (currentAddType === "brulage") prefillBrulageDefaults();
     updateAchatUnitLabels();
+    setAddModalMode("add");
     addModal.hidden = false;
   }
-  function closeAddModal() { addModal.hidden = true; }
+
+  function openEditModal(type, id) {
+    var entry = findEntryByTypeId(type, id);
+    if (!entry) return;
+    editingEntry = { type: type, id: id };
+    currentAddType = type;
+    document.querySelectorAll("#addTypeSegmented .segmented__btn").forEach(function (b) {
+      b.classList.toggle("is-active", b.dataset.addType === currentAddType);
+    });
+    updateAddFieldsVisibility();
+    document.getElementById("addDate").value = entry.date;
+    document.getElementById("addNote").value = entry.note || "";
+    if (type === "brulage") {
+      document.getElementById("addBrulageQty").value = entry.kg;
+      document.getElementById("addBrulageUnit").value = "kg";
+    } else if (type === "achat") {
+      document.getElementById("addAchatUnit").value = entry.unit;
+      document.getElementById("addAchatQty").value = entry.qty;
+      document.getElementById("addAchatKgPerSack").value = entry.kgPerSack;
+      document.getElementById("addAchatPrice").value = entry.priceInput;
+      updateAchatUnitLabels();
+    } else if (type === "entretien") {
+      document.getElementById("addEntretienType").value = entry.type;
+      document.getElementById("addEntretienCost").value = entry.cost || "";
+    }
+    setAddModalMode("edit");
+    addModal.hidden = false;
+  }
+
+  function closeAddModal() {
+    addModal.hidden = true;
+    editingEntry = null;
+    document.getElementById("addTypeSegmented").classList.remove("is-disabled");
+  }
 
   document.getElementById("fabAdd").addEventListener("click", openAddModal);
   document.getElementById("btnCloseAddModal").addEventListener("click", closeAddModal);
@@ -1026,6 +1075,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   }
 
   document.getElementById("addTypeSegmented").addEventListener("click", function (e) {
+    if (editingEntry) return;
     var btn = e.target.closest(".segmented__btn");
     if (!btn) return;
     currentAddType = btn.dataset.addType;
@@ -1043,33 +1093,53 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   }
   document.getElementById("addAchatUnit").addEventListener("change", updateAchatUnitLabels);
 
+  function readBrulageFields() {
+    var qty = parseFloat(document.getElementById("addBrulageQty").value) || 0;
+    var unit = document.getElementById("addBrulageUnit").value;
+    return { kg: unit === "sacs" ? qty * state.settings.kgPerSack : qty };
+  }
+  function readAchatFields() {
+    return {
+      unit: document.getElementById("addAchatUnit").value,
+      qty: parseFloat(document.getElementById("addAchatQty").value) || 0,
+      sacsParPalette: state.settings.sacsParPalette,
+      kgPerSack: parseFloat(document.getElementById("addAchatKgPerSack").value) || 0,
+      priceInput: parseFloat(document.getElementById("addAchatPrice").value) || 0
+    };
+  }
+  function readEntretienFields() {
+    return {
+      type: document.getElementById("addEntretienType").value,
+      cost: parseFloat(document.getElementById("addEntretienCost").value) || 0
+    };
+  }
+
   document.getElementById("formAdd").addEventListener("submit", function (e) {
     e.preventDefault();
+
+    if (currentAddType === "achat") {
+      var qtyStr = document.getElementById("addAchatQty").value;
+      var priceStr = document.getElementById("addAchatPrice").value;
+      if (qtyStr === "" || priceStr === "") {
+        alert("Merci de renseigner la quantité et le prix de l'achat.");
+        return;
+      }
+    }
+
     var date = document.getElementById("addDate").value;
     var note = document.getElementById("addNote").value.trim();
+    var fields = currentAddType === "brulage" ? readBrulageFields()
+      : currentAddType === "achat" ? readAchatFields()
+      : readEntretienFields();
 
-    if (currentAddType === "brulage") {
-      var qty = parseFloat(document.getElementById("addBrulageQty").value) || 0;
-      var unit = document.getElementById("addBrulageUnit").value;
-      var kg = unit === "sacs" ? qty * state.settings.kgPerSack : qty;
-      state.consumptions.push({ id: uid(), date: date, kg: kg, note: note });
-    } else if (currentAddType === "achat") {
-      state.purchases.push({
-        id: uid(), date: date,
-        unit: document.getElementById("addAchatUnit").value,
-        qty: parseFloat(document.getElementById("addAchatQty").value) || 0,
-        sacsParPalette: state.settings.sacsParPalette,
-        kgPerSack: parseFloat(document.getElementById("addAchatKgPerSack").value) || 0,
-        priceInput: parseFloat(document.getElementById("addAchatPrice").value) || 0,
-        note: note
-      });
-    } else if (currentAddType === "entretien") {
-      state.maintenances.push({
-        id: uid(), date: date,
-        type: document.getElementById("addEntretienType").value,
-        cost: parseFloat(document.getElementById("addEntretienCost").value) || 0,
-        note: note
-      });
+    if (editingEntry) {
+      var existing = findEntryByTypeId(editingEntry.type, editingEntry.id);
+      if (existing) Object.assign(existing, fields, { date: date, note: note });
+    } else {
+      var entry = Object.assign({ id: uid(), date: date, note: note }, fields);
+      if (currentAddType === "achat") state.purchases.push(entry);
+      else if (currentAddType === "brulage") state.consumptions.push(entry);
+      else state.maintenances.push(entry);
     }
 
     saveState();
@@ -1192,9 +1262,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
   function buildUnifiedEntries() {
     var entries = [];
-    state.purchases.forEach(function (p) { entries.push(Object.assign({ type: "achat" }, p)); });
-    state.consumptions.forEach(function (c) { entries.push(Object.assign({ type: "brulage" }, c)); });
-    state.maintenances.forEach(function (m) { entries.push(Object.assign({ type: "entretien" }, m)); });
+    state.purchases.forEach(function (p) { entries.push(Object.assign({ kind: "achat" }, p)); });
+    state.consumptions.forEach(function (c) { entries.push(Object.assign({ kind: "brulage" }, c)); });
+    state.maintenances.forEach(function (m) { entries.push(Object.assign({ kind: "entretien" }, m)); });
     entries.sort(function (a, b) { return b.date.localeCompare(a.date); });
     return entries;
   }
@@ -1202,9 +1272,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   function summarizeGroup(entries) {
     var kgSum = 0, achatCount = 0, achatTotal = 0, entretienCount = 0, entretienCost = 0;
     entries.forEach(function (e) {
-      if (e.type === "brulage") kgSum += e.kg;
-      else if (e.type === "achat") { achatCount++; achatTotal += purchaseTotal(e); }
-      else if (e.type === "entretien") { entretienCount++; entretienCost += e.cost || 0; }
+      if (e.kind === "brulage") kgSum += e.kg;
+      else if (e.kind === "achat") { achatCount++; achatTotal += purchaseTotal(e); }
+      else if (e.kind === "entretien") { entretienCount++; entretienCost += e.cost || 0; }
     });
     var parts = [];
     if (kgSum > 0) parts.push("🔥 " + fmtSacs(kgSum) + " sac(s) - " + fmtKg(kgSum));
@@ -1215,20 +1285,20 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
   function entryRowHtml(e) {
     var label, value, note = e.note || "", costNote = "";
-    if (e.type === "brulage") {
+    if (e.kind === "brulage") {
       label = humanizeDate(e.date);
       value = fmtSacs(e.kg) + " sac(s) (" + fmtKg(e.kg) + ")";
       var avgKgPrice = computeAvgPricePerKg(state.purchases);
       if (avgKgPrice > 0) costNote = "≈ " + fmtMoney(e.kg * avgKgPrice) + " (au prix moyen du sac)";
-    } else if (e.type === "achat") {
+    } else if (e.kind === "achat") {
       label = humanizeDate(e.date) + " — " + (e.unit === "palette" ? e.qty + " palette(s)" : e.qty + " sac(s)");
       value = fmtMoney(purchaseTotal(e));
     } else {
       label = humanizeDate(e.date) + " — " + (MAINTENANCE_LABELS[e.type] || e.type);
       value = e.cost > 0 ? fmtMoney(e.cost) : "";
     }
-    var icon = e.type === "brulage" ? "🔥" : e.type === "achat" ? "🛒" : "🧹";
-    return "<div class=\"entry-row entry-row--" + e.type + "\">" +
+    var icon = e.kind === "brulage" ? "🔥" : e.kind === "achat" ? "🛒" : "🧹";
+    return "<div class=\"entry-row entry-row--" + e.kind + "\" data-entry-type=\"" + e.kind + "\" data-entry-id=\"" + e.id + "\">" +
       "<div class=\"entry-row__left\">" +
       "<span class=\"entry-row__icon\">" + icon + "</span>" +
       "<div class=\"entry-row__text\"><div class=\"entry-row__label\">" + label + "</div>" +
@@ -1237,7 +1307,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       "</div></div>" +
       "<div class=\"entry-row__right\">" +
       "<span class=\"entry-row__value\">" + value + "</span>" +
-      "<button class=\"entry-row__delete\" data-delete-type=\"" + e.type + "\" data-delete-id=\"" + e.id + "\">✕</button>" +
+      "<button class=\"entry-row__delete\" data-delete-type=\"" + e.kind + "\" data-delete-id=\"" + e.id + "\">✕</button>" +
       "</div></div>";
   }
 
@@ -1283,6 +1353,11 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         deleteEntry(btn.dataset.deleteType, btn.dataset.deleteId);
       });
     });
+    listEl.querySelectorAll(".entry-row").forEach(function (row) {
+      row.addEventListener("click", function () {
+        openEditModal(row.dataset.entryType, row.dataset.entryId);
+      });
+    });
   }
 
   function deleteEntry(type, id) {
@@ -1295,7 +1370,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
   function renderHistorique() {
     var all = buildUnifiedEntries();
-    var filtered = historiqueTypeFilter === "all" ? all : all.filter(function (e) { return e.type === historiqueTypeFilter; });
+    var filtered = historiqueTypeFilter === "all" ? all : all.filter(function (e) { return e.kind === historiqueTypeFilter; });
     if (historiqueTypeFilter === "entretien" && historiqueMType !== "all") {
       filtered = filtered.filter(function (e) { return e.type === historiqueMType; });
     }
@@ -1303,7 +1378,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   }
 
   function renderEntretiens() {
-    var entries = state.maintenances.map(function (m) { return Object.assign({ type: "entretien" }, m); });
+    var entries = state.maintenances.map(function (m) { return Object.assign({ kind: "entretien" }, m); });
     entries.sort(function (a, b) { return b.date.localeCompare(a.date); });
     if (entretienPageMType !== "all") entries = entries.filter(function (e) { return e.type === entretienPageMType; });
     renderGroupedList(document.getElementById("entretiensList"), document.getElementById("entretiensEmptyWrap"), entries);

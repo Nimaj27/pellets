@@ -3,6 +3,24 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.3.0] - 2026-09-22
+
+### Ajouté
+- **Modifier une saisie** : cliquer sur une ligne dans l'Historique ou les
+  Entretiens rouvre la fenêtre d'ajout pré-remplie, en mode édition
+  (le type de saisie n'est alors plus modifiable).
+
+### Corrigé
+- Les entrées d'entretien avaient un conflit entre leur classification
+  interne (« entretien ») et leur sous-type (Annuel/Régulier/Vitre/
+  Annexes), tous deux stockés sous le même nom de champ : le second
+  écrasait systématiquement le premier. Cela cassait silencieusement le
+  filtre « Entretien » de l'Historique, le bouton de suppression sur ces
+  lignes, et la bordure colorée des lignes de brûlage. Tout est corrigé.
+- Le formulaire d'achat pouvait rester bloqué (impossible de valider)
+  lors de la modification d'une saisie d'un autre type, à cause de
+  champs requis restés actifs bien que masqués.
+
 ## [2.2.1] - 2026-09-22
 
 ### Ajouté
