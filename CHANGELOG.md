@@ -3,6 +3,13 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.3.2] - 2026-09-23
+
+### Corrigé
+- Le graphique « € Dépenses » des Statistiques (évolution mensuelle de la
+  saison) ne comptait que les achats — le coût des entretiens s'y ajoute
+  désormais.
+
 ## [2.3.1] - 2026-09-23
 
 ### Ajouté

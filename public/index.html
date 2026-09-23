@@ -1531,6 +1531,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       state.purchases.forEach(function (p) {
         if (seasonStartYear(p.date) === startYear) monthlyData[seasonMonthIndex(p.date)] += purchaseTotal(p);
       });
+      state.maintenances.forEach(function (m) {
+        if (seasonStartYear(m.date) === startYear) monthlyData[seasonMonthIndex(m.date)] += m.cost || 0;
+      });
       renderChart("chartSeasonMonthly", "bar", getSeasonMonthLabels(), [{ label: "Dépenses (" + state.settings.currency + ")", data: monthlyData, backgroundColor: "#5b7cfa" }]);
     }
 
