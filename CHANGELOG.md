@@ -3,6 +3,77 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.3.2] - 2026-09-23
+
+### Corrigé
+- Le graphique « € Dépenses » des Statistiques (évolution mensuelle de la
+  saison) ne comptait que les achats — le coût des entretiens s'y ajoute
+  désormais.
+
+## [2.3.1] - 2026-09-23
+
+### Ajouté
+- **Sacs consommés (période)** : nouvelle carte sur le Dashboard, juste à
+  côté du prix moyen du sac.
+
+### Changé
+- **Dépenses (période)** intègre désormais la valeur estimée des sacs
+  brûlés sur la période (au prix moyen du sac), en plus des achats et des
+  entretiens — pour répondre à « j'ai brûlé 10 sacs, ça m'a coûté
+  combien ? » même sans achat sur la période en cours.
+
+## [2.3.0] - 2026-09-22
+
+### Ajouté
+- **Modifier une saisie** : cliquer sur une ligne dans l'Historique ou les
+  Entretiens rouvre la fenêtre d'ajout pré-remplie, en mode édition
+  (le type de saisie n'est alors plus modifiable).
+
+### Corrigé
+- Les entrées d'entretien avaient un conflit entre leur classification
+  interne (« entretien ») et leur sous-type (Annuel/Régulier/Vitre/
+  Annexes), tous deux stockés sous le même nom de champ : le second
+  écrasait systématiquement le premier. Cela cassait silencieusement le
+  filtre « Entretien » de l'Historique, le bouton de suppression sur ces
+  lignes, et la bordure colorée des lignes de brûlage. Tout est corrigé.
+- Le formulaire d'achat pouvait rester bloqué (impossible de valider)
+  lors de la modification d'une saisie d'un autre type, à cause de
+  champs requis restés actifs bien que masqués.
+
+## [2.2.1] - 2026-09-22
+
+### Ajouté
+- **Prix moyen du sac** sur le Dashboard : coût moyen basé sur l'historique
+  des achats de la période sélectionnée.
+- **Coût estimé affiché sur chaque brûlage** dans l'Historique (au prix
+  moyen du sac), pour savoir combien coûte chaque sac utilisé.
+
+### Corrigé
+- Le prix (achat) est désormais un champ obligatoire, pour éviter de
+  saisir un achat à 0 € par oubli (ce qui fausse le prix moyen calculé).
+
+## [2.2.0] - 2026-09-22
+
+### Ajouté
+- **Application installable (PWA)** : une fois déployée en HTTPS
+  (`pellets-conso.web.app`), le navigateur mobile propose « Installer
+  l'application » / « Ajouter à l'écran d'accueil ». L'appli s'ouvre alors
+  comme une appli native (icône, plein écran, sans barre d'adresse).
+- **Icône** dédiée (192×192, 512×512, apple-touch-icon).
+- **Fonctionnement hors-ligne** basique via un service worker (cache de
+  la page et de ses ressources).
+
+## [2.1.1] - 2026-09-22
+
+### Corrigé
+- Page blanche/sans style quand `index.html` est ouvert directement depuis
+  un gestionnaire de fichiers Android (URI `content://`) : les fichiers
+  liés en chemin relatif (`css/style.css`, `js/app.js`) ne se chargeaient
+  pas dans ce contexte. L'application est désormais un **fichier HTML
+  unique et autonome** (CSS et JS intégrés) : elle fonctionne quelle que
+  soit la façon dont elle est ouverte (double-clic, gestionnaire de
+  fichiers, serveur local, Firebase Hosting).
+
 ## [2.1.0] - 2026-09-22
 
 ### Ajouté
