@@ -542,6 +542,11 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         <span class="stat-card__value" id="statAvgPriceSack">—</span>
         <span class="stat-card__hint" id="statAvgPriceHint"></span>
       </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Sacs consommés (période)</span>
+        <span class="stat-card__value" id="statSacksBurned">0 sac(s)</span>
+        <span class="stat-card__hint" id="statSacksBurnedHint"></span>
+      </div>
     </div>
 
     <div class="chart-card">
@@ -1407,10 +1412,8 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     var scope = getDashScope();
     var purchasesInScope = scope.mode === "all" ? state.purchases : state.purchases.filter(function (p) { return seasonStartYear(p.date) === scope.startYear; });
     var maintenancesInScope = scope.mode === "all" ? state.maintenances : state.maintenances.filter(function (m) { return seasonStartYear(m.date) === scope.startYear; });
-
-    var totalSpent = purchasesInScope.reduce(function (s, p) { return s + purchaseTotal(p); }, 0) +
-      maintenancesInScope.reduce(function (s, m) { return s + (m.cost || 0); }, 0);
-    document.getElementById("statSpent").textContent = fmtMoney(totalSpent);
+    var consumptionsInScope = scope.mode === "all" ? state.consumptions : state.consumptions.filter(function (c) { return seasonStartYear(c.date) === scope.startYear; });
+    var kgConsumedInScope = consumptionsInScope.reduce(function (s, c) { return s + c.kg; }, 0);
 
     var avgPricePerKg = computeAvgPricePerKg(purchasesInScope);
     var avgPriceSackEl = document.getElementById("statAvgPriceSack");
@@ -1422,6 +1425,14 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       avgPriceSackEl.textContent = "—";
       avgPriceHintEl.textContent = "Aucun achat renseigné";
     }
+
+    document.getElementById("statSacksBurned").textContent = fmtSacs(kgConsumedInScope) + " sac(s)";
+    document.getElementById("statSacksBurnedHint").textContent = fmtKg(kgConsumedInScope);
+
+    var totalSpent = purchasesInScope.reduce(function (s, p) { return s + purchaseTotal(p); }, 0) +
+      maintenancesInScope.reduce(function (s, m) { return s + (m.cost || 0); }, 0) +
+      kgConsumedInScope * avgPricePerKg;
+    document.getElementById("statSpent").textContent = fmtMoney(totalSpent);
 
     var stock = computeStockKg();
     document.getElementById("statStock").textContent = fmtKg(stock);

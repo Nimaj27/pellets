@@ -3,6 +3,18 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.3.1] - 2026-09-23
+
+### Ajouté
+- **Sacs consommés (période)** : nouvelle carte sur le Dashboard, juste à
+  côté du prix moyen du sac.
+
+### Changé
+- **Dépenses (période)** intègre désormais la valeur estimée des sacs
+  brûlés sur la période (au prix moyen du sac), en plus des achats et des
+  entretiens — pour répondre à « j'ai brûlé 10 sacs, ça m'a coûté
+  combien ? » même sans achat sur la période en cours.
+
 ## [2.3.0] - 2026-09-22
 
 ### Ajouté
