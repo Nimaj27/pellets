@@ -285,6 +285,18 @@ body {
 
 .chart-card h2 { margin: 0; font-size: 1rem; }
 
+.chart-card__total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.chart-card__total strong { font-size: 1rem; color: var(--text); font-weight: 800; }
+
 .chip {
   background: var(--surface-2);
   border-radius: 999px;
@@ -711,7 +723,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     </header>
 
     <div class="season-bar">
-      <select id="statsSeasonSelect" class="pill-select"></select>
+      <div class="season-scroll" id="statsSeasonSegmented"></div>
     </div>
 
     <div class="chart-card">
@@ -720,6 +732,10 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         <button class="segmented__btn" data-metric="cost">€ Dépenses</button>
       </div>
       <canvas id="chartSeasonMonthly" height="220"></canvas>
+      <div class="chart-card__total">
+        <span>Total saison</span>
+        <strong id="seasonMonthlyTotal">—</strong>
+      </div>
     </div>
 
     <div class="chart-card">
@@ -738,6 +754,16 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       <h1>Entretiens</h1>
       <span></span>
     </header>
+
+    <div class="chart-card" id="entretienSummaryCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="stat-card__label">Total entretiens</div>
+          <div class="stat-card__value" id="entretienTotalValue">—</div>
+        </div>
+        <span style="font-size:1.6rem;">🧹</span>
+      </div>
+    </div>
 
     <div class="chip-row" id="entretienPageFilters">
       <button class="chip-filter is-active" data-mtype="all">Tous</button>
@@ -1498,6 +1524,8 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     var entries = state.maintenances.map(function (m) { return Object.assign({ kind: "entretien" }, m); });
     entries.sort(function (a, b) { return b.date.localeCompare(a.date); });
     if (entretienPageMType !== "all") entries = entries.filter(function (e) { return e.type === entretienPageMType; });
+    var total = entries.reduce(function (s, e) { return s + (e.cost || 0); }, 0);
+    document.getElementById("entretienTotalValue").textContent = fmtMoney(total);
     renderGroupedList(document.getElementById("entretiensList"), document.getElementById("entretiensEmptyWrap"), entries);
   }
 
@@ -1620,17 +1648,26 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   // ---------- Statistiques ----------
   var seasonMetric = "kg";
   var multiSeasonMetric = "burned";
+  var statsSeasonValue = String(currentSeasonStartYear());
 
   function renderStatsSeasonOptions() {
-    var select = document.getElementById("statsSeasonSelect");
-    var current = select.value;
+    var container = document.getElementById("statsSeasonSegmented");
     var seasons = allSeasonStartYears();
-    select.innerHTML = seasons.slice().reverse().map(function (s) { return "<option value=\"" + s + "\">Saison " + seasonLabel(s) + "</option>"; }).join("");
-    var wanted = current || String(currentSeasonStartYear());
-    select.value = Array.prototype.some.call(select.options, function (o) { return o.value === wanted; }) ? wanted : select.options[0].value;
+    var valid = seasons.map(String);
+    if (valid.indexOf(statsSeasonValue) === -1) statsSeasonValue = valid.length ? valid[valid.length - 1] : statsSeasonValue;
+    container.innerHTML = seasons.slice().reverse().map(function (s) {
+      var v = String(s);
+      return "<button type=\"button\" class=\"season-pill" + (statsSeasonValue === v ? " is-active" : "") + "\" data-season=\"" + v + "\">Saison " + seasonLabel(s) + "</button>";
+    }).join("");
   }
 
-  document.getElementById("statsSeasonSelect").addEventListener("change", renderStatistiques);
+  document.getElementById("statsSeasonSegmented").addEventListener("click", function (e) {
+    var btn = e.target.closest(".season-pill");
+    if (!btn) return;
+    statsSeasonValue = btn.dataset.season;
+    renderStatsSeasonOptions();
+    renderStatistiques();
+  });
 
   document.getElementById("seasonMetricToggle").addEventListener("click", function (e) {
     var btn = e.target.closest(".segmented__btn");
@@ -1649,7 +1686,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   });
 
   function renderStatistiques() {
-    var startYear = parseInt(document.getElementById("statsSeasonSelect").value, 10);
+    var startYear = parseInt(statsSeasonValue, 10);
 
     var monthlyData = new Array(12).fill(0);
     if (seasonMetric === "kg") {
@@ -1667,6 +1704,11 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       });
       renderChart("chartSeasonMonthly", "bar", getSeasonMonthLabels(), [{ label: "Dépenses (" + state.settings.currency + ")", data: monthlyData, backgroundColor: "#5b7cfa" }]);
     }
+
+    var seasonMonthlyTotal = monthlyData.reduce(function (a, b) { return a + b; }, 0);
+    document.getElementById("seasonMonthlyTotal").textContent = seasonMetric === "kg"
+      ? (Math.round(seasonMonthlyTotal * 10) / 10).toLocaleString("fr-FR") + " sac(s)"
+      : fmtMoney(seasonMonthlyTotal);
 
     var seasons = allSeasonStartYears();
     var labels = seasons.map(seasonLabel);
