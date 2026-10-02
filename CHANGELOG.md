@@ -3,6 +3,28 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.5.0] - 2026-10-02
+
+### Changé (Statistiques et Entretiens plus intuitifs)
+- **Statistiques** : sélecteur de saison en pastilles cliquables (comme le
+  Dashboard) à la place du menu déroulant, et ajout d'un **total de la
+  saison** sous le graphique d'évolution mensuelle (sacs ou € selon la vue
+  choisie), pour toujours voir la somme en plus du détail mois par mois.
+- **Entretiens** : nouvelle carte **Total entretiens** en haut de la page,
+  qui suit le filtre par type sélectionné (Tous / Annuel / Régulier /
+  Vitre / Annexes).
+
+## [2.4.0] - 2026-10-02
+
+### Changé (Dashboard plus intuitif)
+- **Sélecteur de période** : pastilles cliquables (« Depuis toujours » +
+  une par saison) au lieu d'un menu déroulant caché.
+- **Dépenses de la période** : affichage façon addition — Achats +
+  Entretiens + Sacs brûlés (estimé) = Total — pour que le calcul soit
+  transparent au lieu d'un chiffre unique.
+- **Stock restant** : barre de progression avec repère du seuil
+  d'alerte, à la place d'un simple texte.
+
 ## [2.3.2] - 2026-09-23
 
 ### Corrigé
