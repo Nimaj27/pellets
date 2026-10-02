@@ -137,6 +137,87 @@ body {
   font-weight: 600;
 }
 
+.season-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: 100%;
+}
+
+.season-pill {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.season-pill.is-active { background: var(--accent-nav); color: #06081f; }
+
+/* ---------- Dépenses (détail) ---------- */
+.spend-card h2 { margin: 0 0 0.9rem; font-size: 1rem; }
+
+.spend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.3rem 0;
+}
+
+.spend-icon { font-size: 1.05rem; flex-shrink: 0; width: 1.4rem; text-align: center; }
+.spend-label { flex: 1; font-size: 0.88rem; color: var(--text); }
+.spend-value { font-weight: 700; font-size: 0.92rem; }
+
+.spend-op {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding-left: 1.7rem;
+}
+
+.spend-op--eq { padding-left: 0; width: 1.4rem; text-align: center; font-weight: 700; }
+
+.spend-divider { height: 1px; background: var(--border); margin: 0.5rem 0 0.3rem; }
+
+.spend-row--total .spend-label { font-weight: 700; }
+.spend-value--total { font-size: 1.3rem; font-weight: 800; color: var(--accent-burn); }
+
+/* ---------- Stock (barre) ---------- */
+.stock-hint { font-size: 0.78rem; color: var(--text-muted); }
+.stock-value { font-size: 1.5rem; font-weight: 800; margin: 0.35rem 0 0.9rem; }
+
+.stock-bar {
+  position: relative;
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+
+.stock-bar__fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--accent-burn), #ffb366);
+}
+
+.stock-bar__alert {
+  position: absolute;
+  top: -3px; bottom: -3px;
+  width: 2px;
+  background: var(--danger);
+  border-radius: 1px;
+}
+
+.stock-bar__caption { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.6rem; }
+
 /* ---------- Bandeau alerte ---------- */
 .alert-banner {
   background: color-mix(in srgb, var(--danger) 16%, var(--surface));
@@ -511,26 +592,57 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     </header>
 
     <div class="season-bar">
-      <select id="dashScopeSelect" class="pill-select"></select>
+      <div class="season-scroll" id="dashScopeSegmented"></div>
     </div>
 
     <div class="alert-banner" id="stockAlertBanner" hidden>
       ⚠️ <strong>Stock bas</strong> — <span id="stockAlertText"></span>
     </div>
 
-    <div class="stat-grid">
-      <div class="stat-card">
-        <span class="stat-card__label">Dépenses (période)</span>
-        <span class="stat-card__value" id="statSpent">0 €</span>
+    <div class="chart-card spend-card">
+      <h2>Dépenses de la période</h2>
+      <div class="spend-row">
+        <span class="spend-icon">🛒</span>
+        <span class="spend-label">Achats de sacs</span>
+        <span class="spend-value" id="statSpentAchats">0 €</span>
       </div>
+      <div class="spend-op">+</div>
+      <div class="spend-row">
+        <span class="spend-icon">🧹</span>
+        <span class="spend-label">Entretiens</span>
+        <span class="spend-value" id="statSpentEntretien">0 €</span>
+      </div>
+      <div class="spend-op">+</div>
+      <div class="spend-row">
+        <span class="spend-icon">🔥</span>
+        <span class="spend-label">Sacs brûlés (estimé)</span>
+        <span class="spend-value" id="statSpentBrule">0 €</span>
+      </div>
+      <div class="spend-divider"></div>
+      <div class="spend-row spend-row--total">
+        <span class="spend-op spend-op--eq">=</span>
+        <span class="spend-label">Total dépensé</span>
+        <span class="spend-value spend-value--total" id="statSpent">0 €</span>
+      </div>
+    </div>
+
+    <div class="chart-card" id="statStockCard">
+      <div class="chart-card__header">
+        <h2>Stock restant</h2>
+        <span class="stock-hint" id="statStockHint"></span>
+      </div>
+      <div class="stock-value" id="statStock">0 kg</div>
+      <div class="stock-bar">
+        <div class="stock-bar__fill" id="stockBarFill"></div>
+        <div class="stock-bar__alert" id="stockBarAlert"></div>
+      </div>
+      <div class="stock-bar__caption">Seuil d'alerte : <span id="statStockAlertCaption"></span></div>
+    </div>
+
+    <div class="stat-grid">
       <div class="stat-card">
         <span class="stat-card__label">Rythme (7 jours)</span>
         <span class="stat-card__value" id="statRate">0 kg/j</span>
-      </div>
-      <div class="stat-card" id="statStockCard">
-        <span class="stat-card__label">Stock restant</span>
-        <span class="stat-card__value" id="statStock">0 kg</span>
-        <span class="stat-card__hint" id="statStockHint"></span>
       </div>
       <div class="stat-card">
         <span class="stat-card__label">Autonomie estimée</span>
@@ -1390,22 +1502,31 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   }
 
   // ---------- Dashboard ----------
+  var dashScopeValue = String(currentSeasonStartYear());
+
   function renderDashScopeOptions() {
-    var select = document.getElementById("dashScopeSelect");
-    var current = select.value;
+    var container = document.getElementById("dashScopeSegmented");
     var seasons = allSeasonStartYears();
-    var options = "<option value=\"all\">Depuis toujours</option>" +
-      seasons.slice().reverse().map(function (s) { return "<option value=\"" + s + "\">Saison " + seasonLabel(s) + "</option>"; }).join("");
-    select.innerHTML = options;
-    var wanted = current || String(currentSeasonStartYear());
-    select.value = Array.prototype.some.call(select.options, function (o) { return o.value === wanted; }) ? wanted : "all";
+    var valid = ["all"].concat(seasons.map(String));
+    if (valid.indexOf(dashScopeValue) === -1) dashScopeValue = "all";
+    var html = "<button type=\"button\" class=\"season-pill" + (dashScopeValue === "all" ? " is-active" : "") + "\" data-scope=\"all\">Depuis toujours</button>";
+    html += seasons.slice().reverse().map(function (s) {
+      var v = String(s);
+      return "<button type=\"button\" class=\"season-pill" + (dashScopeValue === v ? " is-active" : "") + "\" data-scope=\"" + v + "\">Saison " + seasonLabel(s) + "</button>";
+    }).join("");
+    container.innerHTML = html;
   }
 
-  document.getElementById("dashScopeSelect").addEventListener("change", renderDashboard);
+  document.getElementById("dashScopeSegmented").addEventListener("click", function (e) {
+    var btn = e.target.closest(".season-pill");
+    if (!btn) return;
+    dashScopeValue = btn.dataset.scope;
+    renderDashScopeOptions();
+    renderDashboard();
+  });
 
   function getDashScope() {
-    var val = document.getElementById("dashScopeSelect").value;
-    return val === "all" ? { mode: "all" } : { mode: "season", startYear: parseInt(val, 10) };
+    return dashScopeValue === "all" ? { mode: "all" } : { mode: "season", startYear: parseInt(dashScopeValue, 10) };
   }
 
   function renderDashboard() {
@@ -1429,14 +1550,24 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     document.getElementById("statSacksBurned").textContent = fmtSacs(kgConsumedInScope) + " sac(s)";
     document.getElementById("statSacksBurnedHint").textContent = fmtKg(kgConsumedInScope);
 
-    var totalSpent = purchasesInScope.reduce(function (s, p) { return s + purchaseTotal(p); }, 0) +
-      maintenancesInScope.reduce(function (s, m) { return s + (m.cost || 0); }, 0) +
-      kgConsumedInScope * avgPricePerKg;
+    var spentAchats = purchasesInScope.reduce(function (s, p) { return s + purchaseTotal(p); }, 0);
+    var spentEntretien = maintenancesInScope.reduce(function (s, m) { return s + (m.cost || 0); }, 0);
+    var spentBrule = kgConsumedInScope * avgPricePerKg;
+    var totalSpent = spentAchats + spentEntretien + spentBrule;
+    document.getElementById("statSpentAchats").textContent = fmtMoney(spentAchats);
+    document.getElementById("statSpentEntretien").textContent = fmtMoney(spentEntretien);
+    document.getElementById("statSpentBrule").textContent = fmtMoney(spentBrule);
     document.getElementById("statSpent").textContent = fmtMoney(totalSpent);
 
     var stock = computeStockKg();
     document.getElementById("statStock").textContent = fmtKg(stock);
     document.getElementById("statStockHint").textContent = "≈ " + fmtSacs(stock) + " sac(s)";
+    document.getElementById("statStockAlertCaption").textContent = fmtKg(state.settings.stockAlertKg);
+    var totalEverKg = (state.settings.initialStockKg || 0) + state.purchases.reduce(function (s, p) { return s + purchaseKg(p); }, 0);
+    var stockPct = totalEverKg > 0 ? Math.max(0, Math.min(100, Math.round((stock / totalEverKg) * 100))) : 0;
+    var alertPct = totalEverKg > 0 ? Math.max(0, Math.min(100, Math.round((state.settings.stockAlertKg / totalEverKg) * 100))) : 0;
+    document.getElementById("stockBarFill").style.width = stockPct + "%";
+    document.getElementById("stockBarAlert").style.left = alertPct + "%";
 
     var dailyAvg = computeDailyAvgConsumption();
     var autonomyEl = document.getElementById("statAutonomy");

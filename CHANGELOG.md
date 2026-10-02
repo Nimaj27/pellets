@@ -3,6 +3,17 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [2.4.0] - 2026-10-02
+
+### Changé (Dashboard plus intuitif)
+- **Sélecteur de période** : pastilles cliquables (« Depuis toujours » +
+  une par saison) au lieu d'un menu déroulant caché.
+- **Dépenses de la période** : affichage façon addition — Achats +
+  Entretiens + Sacs brûlés (estimé) = Total — pour que le calcul soit
+  transparent au lieu d'un chiffre unique.
+- **Stock restant** : barre de progression avec repère du seuil
+  d'alerte, à la place d'un simple texte.
+
 ## [2.3.2] - 2026-09-23
 
 ### Corrigé
