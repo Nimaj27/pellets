@@ -3,6 +3,13 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [3.0.1] - 2026-10-02
+
+### Changé
+- **Favicon et icônes PWA** (192, 512, écran d'accueil iOS) régénérées
+  pour reprendre exactement le nouveau logo (flamme sombre sur fond
+  orange), au lieu de l'ancien pictogramme en dégradé.
+
 ## [3.0.0] - 2026-10-02
 
 ### Changé (fidélité totale aux maquettes de design)
