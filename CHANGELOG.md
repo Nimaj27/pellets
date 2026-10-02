@@ -3,6 +3,26 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [3.0.0] - 2026-10-02
+
+### Changé (fidélité totale aux maquettes de design)
+- **Icônes** : tous les émojis sont remplacés par des icônes SVG avec
+  badges colorés (navigation, dépenses, stock, lignes d'historique et
+  d'entretiens, filtres), conformément aux maquettes.
+- **En-tête du Dashboard** : logo + « Pellets Conso » à gauche, bouton
+  réglages à droite (au lieu de « Dashboard » + ⚙️).
+- **Sélecteur de période du Dashboard** : simple bascule « Cette saison »
+  / « Depuis toujours » (au lieu des pastilles par saison) avec le
+  libellé de la période affiché en dessous.
+- **Cartes du Dashboard réorganisées** : la carte « Rythme (7 jours) » et
+  le graphique « Consommation mensuelle (saison) » (redondants avec les
+  Statistiques et absents des maquettes) sont retirés ; « Sacs consommés »
+  devient une carte pleine largeur avec icône.
+- **Graphiques** : les graphiques Chart.js (axes, grille) sont remplacés
+  par des graphiques en barres simples façon maquette (7 derniers jours,
+  évolution mensuelle, comparaison entre saisons) — suppression de la
+  dépendance externe Chart.js.
+
 ## [2.5.0] - 2026-10-02
 
 ### Changé (Statistiques et Entretiens plus intuitifs)
