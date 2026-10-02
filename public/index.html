@@ -118,6 +118,30 @@ body {
   flex-shrink: 0;
 }
 
+/* ---------- En-tête de marque (Dashboard) ---------- */
+.brand-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.brand-header__left { display: flex; align-items: center; gap: 10px; }
+.brand-header h1 { margin: 0; font-size: 1.15rem; font-weight: 800; }
+
+/* ---------- Badges d'icône colorés ---------- */
+.icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+}
+.icon-badge--sm { width: 26px; height: 26px; border-radius: 8px; }
+.icon-badge--row { width: 30px; height: 30px; border-radius: 8px; }
+.icon-badge--lg { width: 36px; height: 36px; border-radius: 10px; }
+.icon-badge--xl { width: 44px; height: 44px; border-radius: 12px; }
+.icon-badge--burn { background: color-mix(in srgb, var(--accent-burn) 16%, transparent); color: var(--accent-burn); }
+.icon-badge--purchase { background: color-mix(in srgb, var(--accent-purchase) 16%, transparent); color: var(--accent-purchase); }
+.icon-badge--maintenance { background: color-mix(in srgb, var(--accent-maintenance) 16%, transparent); color: var(--accent-maintenance); }
+.icon-badge--solid-burn { background: var(--accent-burn); color: #120a04; }
+
 /* ---------- Barre de saison / période ---------- */
 .season-bar {
   display: flex;
@@ -327,10 +351,15 @@ body {
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.filter-pill.is-active { background: var(--accent-burn); color: #1a0f04; }
+.filter-pill.is-active { background: var(--accent-nav); color: #06081f; }
 .filter-pill.is-active[data-type="achat"] { background: var(--accent-purchase); color: #06102b; }
+.filter-pill.is-active[data-type="brulage"] { background: var(--accent-burn); color: #1a0f04; }
 .filter-pill.is-active[data-type="entretien"] { background: var(--accent-maintenance); color: #04240f; }
 
 .chip-row {
@@ -379,6 +408,17 @@ body {
 
 .segmented__btn.is-active { background: var(--accent-purchase); color: #06102b; }
 .segmented.is-disabled { opacity: 0.5; pointer-events: none; }
+.segmented--accent-burn .segmented__btn.is-active { background: var(--accent-burn); color: #1a0f04; }
+.segmented__btn svg { vertical-align: -2px; margin-right: 4px; }
+
+/* ---------- Graphiques en barres (CSS) ---------- */
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 140px; }
+.bar-chart__col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+.bar-chart__bar { width: 100%; max-width: 46px; border-radius: 4px 4px 0 0; transition: height 0.2s; }
+.bar-chart__label { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+.bar-chart__value { font-size: 0.7rem; font-weight: 700; color: var(--text); }
+.bar-chart--compact .bar-chart__bar { max-width: 18px; }
+.bar-chart--compact .bar-chart__label { font-size: 0.6rem; }
 
 /* ---------- Historique / listes groupées ---------- */
 .month-group {
@@ -466,6 +506,10 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 /* ---------- Navigation basse ---------- */
@@ -597,14 +641,24 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
   <!-- DASHBOARD -->
   <section id="page-dashboard" class="page is-active">
-    <header class="page-header">
-      <button class="icon-btn" id="btnOpenSettingsDash" aria-label="Paramètres">⚙️</button>
-      <h1>Dashboard <span class="brand">🔥</span></h1>
-      <span></span>
+    <header class="brand-header">
+      <div class="brand-header__left">
+        <div class="icon-badge icon-badge--solid-burn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-3 4-3 8a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 2 1-3-1-4-3-6z"></path></svg>
+        </div>
+        <h1>Pellets Conso</h1>
+      </div>
+      <button class="icon-btn" id="btnOpenSettingsDash" aria-label="Paramètres">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>
+      </button>
     </header>
 
-    <div class="season-bar">
-      <div class="season-scroll" id="dashScopeSegmented"></div>
+    <div class="season-bar" style="flex-direction:column;align-items:stretch;gap:4px;">
+      <div class="segmented segmented--accent-burn" id="dashScopeToggle">
+        <button type="button" class="segmented__btn" data-scope="season">Cette saison</button>
+        <button type="button" class="segmented__btn" data-scope="all">Depuis toujours</button>
+      </div>
+      <div class="stock-bar__caption" id="dashScopeLabel" style="margin-top:0"></div>
     </div>
 
     <div class="alert-banner" id="stockAlertBanner" hidden>
@@ -614,19 +668,25 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     <div class="chart-card spend-card">
       <h2>Dépenses de la période</h2>
       <div class="spend-row">
-        <span class="spend-icon">🛒</span>
+        <span class="icon-badge icon-badge--sm icon-badge--purchase">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.3" fill="currentColor" stroke="none"></circle><circle cx="18" cy="20" r="1.3" fill="currentColor" stroke="none"></circle><path d="M3 4h2l2.2 11a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6.2"></path></svg>
+        </span>
         <span class="spend-label">Achats de sacs</span>
         <span class="spend-value" id="statSpentAchats">0 €</span>
       </div>
       <div class="spend-op">+</div>
       <div class="spend-row">
-        <span class="spend-icon">🧹</span>
+        <span class="icon-badge icon-badge--sm icon-badge--maintenance">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2 2.3-2.3Z"></path></svg>
+        </span>
         <span class="spend-label">Entretiens</span>
         <span class="spend-value" id="statSpentEntretien">0 €</span>
       </div>
       <div class="spend-op">+</div>
       <div class="spend-row">
-        <span class="spend-icon">🔥</span>
+        <span class="icon-badge icon-badge--sm icon-badge--burn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-3 4-3 8a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 2 1-3-1-4-3-6z"></path></svg>
+        </span>
         <span class="spend-label">Sacs brûlés (estimé)</span>
         <span class="spend-value" id="statSpentBrule">0 €</span>
       </div>
@@ -653,24 +713,26 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
     <div class="stat-grid">
       <div class="stat-card">
-        <span class="stat-card__label">Rythme (7 jours)</span>
-        <span class="stat-card__value" id="statRate">0 kg/j</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-card__label">Autonomie estimée</span>
+        <span class="stat-card__label">Autonomie</span>
         <span class="stat-card__value" id="statAutonomy">—</span>
         <span class="stat-card__hint" id="statAutonomyHint"></span>
       </div>
       <div class="stat-card">
-        <span class="stat-card__label">Prix moyen du sac</span>
+        <span class="stat-card__label">Prix moyen / sac</span>
         <span class="stat-card__value" id="statAvgPriceSack">—</span>
         <span class="stat-card__hint" id="statAvgPriceHint"></span>
       </div>
-      <div class="stat-card">
-        <span class="stat-card__label">Sacs consommés (période)</span>
-        <span class="stat-card__value" id="statSacksBurned">0 sac(s)</span>
-        <span class="stat-card__hint" id="statSacksBurnedHint"></span>
+    </div>
+
+    <div class="chart-card" style="display:flex;align-items:center;gap:12px;">
+      <div class="icon-badge icon-badge--lg icon-badge--burn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-3 4-3 8a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 2 1-3-1-4-3-6z"></path></svg>
       </div>
+      <div style="flex:1;">
+        <span class="stat-card__label">Sacs consommés — période</span>
+        <span class="stat-card__value" id="statSacksBurned">0 sac(s)</span>
+      </div>
+      <span class="stock-hint" id="statSacksBurnedHint"></span>
     </div>
 
     <div class="chart-card">
@@ -678,12 +740,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         <h2>7 derniers jours</h2>
         <span class="chip" id="weekTotalChip">0 sac</span>
       </div>
-      <canvas id="chartWeek" height="180"></canvas>
-    </div>
-
-    <div class="chart-card">
-      <h2>Consommation mensuelle (saison)</h2>
-      <canvas id="chartMonthly" height="200"></canvas>
+      <div class="bar-chart" id="chartWeek"></div>
     </div>
   </section>
 
@@ -696,9 +753,18 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
     <div class="filter-grid" id="historiqueTypeFilters">
       <button class="filter-pill is-active" data-type="all">Tous</button>
-      <button class="filter-pill" data-type="achat">🛒 Achat</button>
-      <button class="filter-pill" data-type="brulage">🔥 Brûlage</button>
-      <button class="filter-pill" data-type="entretien">🧹 Entretien</button>
+      <button class="filter-pill" data-type="achat">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.3" fill="currentColor" stroke="none"></circle><circle cx="18" cy="20" r="1.3" fill="currentColor" stroke="none"></circle><path d="M3 4h2l2.2 11a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6.2"></path></svg>
+        Achat
+      </button>
+      <button class="filter-pill" data-type="brulage">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-3 4-3 8a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 2 1-3-1-4-3-6z"></path></svg>
+        Brûlage
+      </button>
+      <button class="filter-pill" data-type="entretien">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2 2.3-2.3Z"></path></svg>
+        Entretien
+      </button>
     </div>
 
     <div class="chip-row" id="historiqueMaintenanceFilters" hidden>
@@ -728,10 +794,10 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
     <div class="chart-card">
       <div class="segmented" id="seasonMetricToggle">
-        <button class="segmented__btn is-active" data-metric="kg">🔥 Sacs brûlés</button>
+        <button class="segmented__btn is-active" data-metric="kg"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-3 4-3 8a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 2 1-3-1-4-3-6z"></path></svg>Sacs brûlés</button>
         <button class="segmented__btn" data-metric="cost">€ Dépenses</button>
       </div>
-      <canvas id="chartSeasonMonthly" height="220"></canvas>
+      <div class="bar-chart bar-chart--compact" id="chartSeasonMonthly"></div>
       <div class="chart-card__total">
         <span>Total saison</span>
         <strong id="seasonMonthlyTotal">—</strong>
@@ -741,10 +807,10 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     <div class="chart-card">
       <h2 style="margin-bottom:0.6rem">Comparaison entre saisons</h2>
       <div class="segmented" id="multiSeasonToggle">
-        <button class="segmented__btn is-active" data-metric="burned">🔥 Sacs brûlés</button>
-        <button class="segmented__btn" data-metric="bought">🛍️ Sacs achetés</button>
+        <button class="segmented__btn is-active" data-metric="burned">Sacs brûlés</button>
+        <button class="segmented__btn" data-metric="bought">Sacs achetés</button>
       </div>
-      <canvas id="chartMultiSeason" height="220"></canvas>
+      <div class="bar-chart" id="chartMultiSeason" style="gap:14px;padding:0 10px;"></div>
     </div>
   </section>
 
@@ -761,7 +827,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
           <div class="stat-card__label">Total entretiens</div>
           <div class="stat-card__value" id="entretienTotalValue">—</div>
         </div>
-        <span style="font-size:1.6rem;">🧹</span>
+        <span class="icon-badge icon-badge--xl icon-badge--maintenance">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2 2.3-2.3Z"></path></svg>
+        </span>
       </div>
     </div>
 
@@ -781,13 +849,27 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
 </div>
 
-<button class="fab" id="fabAdd" aria-label="Ajouter">+</button>
+<button class="fab" id="fabAdd" aria-label="Ajouter">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+</button>
 
 <nav class="bottom-nav" id="bottomNav">
-  <button class="nav-btn is-active" data-page="dashboard"><span class="nav-btn__icon">▦</span><span>Dashboard</span></button>
-  <button class="nav-btn" data-page="historique"><span class="nav-btn__icon">🕐</span><span>Historique</span></button>
-  <button class="nav-btn" data-page="statistiques"><span class="nav-btn__icon">📊</span><span>Statistiques</span></button>
-  <button class="nav-btn" data-page="entretiens"><span class="nav-btn__icon">🧹</span><span>Entretiens</span></button>
+  <button class="nav-btn is-active" data-page="dashboard">
+    <span class="nav-btn__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"></rect><rect x="13" y="3" width="8" height="8" rx="2"></rect><rect x="3" y="13" width="8" height="8" rx="2"></rect><rect x="13" y="13" width="8" height="8" rx="2"></rect></svg></span>
+    <span>Dashboard</span>
+  </button>
+  <button class="nav-btn" data-page="historique">
+    <span class="nav-btn__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+    <span>Historique</span>
+  </button>
+  <button class="nav-btn" data-page="statistiques">
+    <span class="nav-btn__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4" height="9" rx="1"></rect><rect x="10" y="7" width="4" height="14" rx="1"></rect><rect x="17" y="3" width="4" height="18" rx="1"></rect></svg></span>
+    <span>Statistiques</span>
+  </button>
+  <button class="nav-btn" data-page="entretiens">
+    <span class="nav-btn__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2 2.3-2.3Z"></path></svg></span>
+    <span>Entretiens</span>
+  </button>
 </nav>
 
 <!-- MODALE : Ajouter une entrée -->
@@ -930,7 +1012,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       <button id="btnReset" class="btn btn--danger">Réinitialiser toutes les données</button>
     </div>
 
-    <p class="settings-note" style="margin-top:1rem">Pellets Conso — v2.1.0 · <button id="btnOpenChangelog" class="btn" style="padding:0.2rem 0.6rem;font-size:0.8rem">Changelog</button></p>
+    <p class="settings-note" style="margin-top:1rem">Pellets Conso — v3.0.0 · <button id="btnOpenChangelog" class="btn" style="padding:0.2rem 0.6rem;font-size:0.8rem">Changelog</button></p>
   </div>
 </div>
 
@@ -945,7 +1027,6 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 (function () {
   "use strict";
@@ -965,6 +1046,39 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   var MONTH_NAMES_SHORT = ["Janv", "Févr", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"];
 
   var CHANGELOG = [
+    { version: "3.0.0", date: "02/10/2026", items: [
+      "Fidélité totale aux maquettes de design : icônes SVG avec badges colorés partout (fini les émojis), en-tête et sélecteur de période du Dashboard repensés, graphiques en barres simples (suppression de Chart.js).",
+      "Cartes du Dashboard réorganisées (suppression des cartes redondantes avec les Statistiques)."
+    ] },
+    { version: "2.5.0", date: "02/10/2026", items: [
+      "Statistiques : sélecteur de saison en pastilles, total de la saison affiché sous le graphique mensuel.",
+      "Entretiens : carte de total en tête de page, qui suit le filtre par type."
+    ] },
+    { version: "2.4.0", date: "02/10/2026", items: [
+      "Dashboard plus intuitif : sélecteur de période en pastilles, dépenses détaillées façon addition, barre de stock avec repère d'alerte."
+    ] },
+    { version: "2.3.2", date: "23/09/2026", items: [
+      "Le graphique « € Dépenses » des Statistiques comptait désormais aussi le coût des entretiens, pas seulement les achats."
+    ] },
+    { version: "2.3.1", date: "23/09/2026", items: [
+      "Nouvelle carte « Sacs consommés (période) » sur le Dashboard.",
+      "Les dépenses de la période intègrent la valeur estimée des sacs brûlés, même sans achat sur la période."
+    ] },
+    { version: "2.3.0", date: "22/09/2026", items: [
+      "Modifier une saisie existante depuis l'Historique ou les Entretiens.",
+      "Correction d'un conflit entre la classification interne des entretiens et leur sous-type, qui cassait le filtre, la suppression et la bordure colorée.",
+      "Correction du formulaire d'achat qui pouvait rester bloqué lors de la modification d'une autre saisie."
+    ] },
+    { version: "2.2.1", date: "22/09/2026", items: [
+      "Prix moyen du sac sur le Dashboard, et coût estimé affiché sur chaque brûlage.",
+      "Le prix d'achat est désormais obligatoire."
+    ] },
+    { version: "2.2.0", date: "22/09/2026", items: [
+      "Application installable (PWA) avec icône et fonctionnement hors-ligne basique."
+    ] },
+    { version: "2.1.1", date: "22/09/2026", items: [
+      "Page blanche quand l'application est ouverte depuis un gestionnaire de fichiers Android : fichier HTML unique et autonome."
+    ] },
     { version: "2.1.0", date: "22/09/2026", items: [
       "Stock initial configurable (report de la saison précédente) dans les Paramètres.",
       "Stock restant affiché aussi en nombre de sacs, pas seulement en kg.",
@@ -995,7 +1109,6 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   ];
 
   var state = loadState();
-  var charts = {};
 
   // ---------- Stockage ----------
   function migratePurchase(p, defaultSacsParPalette) {
@@ -1440,10 +1553,15 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       label = humanizeDate(e.date) + " — " + (MAINTENANCE_LABELS[e.type] || e.type);
       value = e.cost > 0 ? fmtMoney(e.cost) : "";
     }
-    var icon = e.kind === "brulage" ? "🔥" : e.kind === "achat" ? "🛒" : "🧹";
+    var iconSvg = e.kind === "brulage"
+      ? "<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2c1 3-3 4-3 8a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 2 1-3-1-4-3-6z\"></path></svg>"
+      : e.kind === "achat"
+      ? "<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"9\" cy=\"20\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"></circle><circle cx=\"18\" cy=\"20\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"></circle><path d=\"M3 4h2l2.2 11a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6.2\"></path></svg>"
+      : "<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2 2.3-2.3Z\"></path></svg>";
+    var badgeClass = e.kind === "brulage" ? "icon-badge--burn" : e.kind === "achat" ? "icon-badge--purchase" : "icon-badge--maintenance";
     return "<div class=\"entry-row entry-row--" + e.kind + "\" data-entry-type=\"" + e.kind + "\" data-entry-id=\"" + e.id + "\">" +
       "<div class=\"entry-row__left\">" +
-      "<span class=\"entry-row__icon\">" + icon + "</span>" +
+      "<span class=\"icon-badge icon-badge--row " + badgeClass + "\">" + iconSvg + "</span>" +
       "<div class=\"entry-row__text\"><div class=\"entry-row__label\">" + label + "</div>" +
       (note ? "<div class=\"entry-row__note\">" + note + "</div>" : "") +
       (costNote ? "<div class=\"entry-row__note\">" + costNote + "</div>" : "") +
@@ -1530,31 +1648,27 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   }
 
   // ---------- Dashboard ----------
-  var dashScopeValue = String(currentSeasonStartYear());
+  var dashScopeMode = "season";
 
   function renderDashScopeOptions() {
-    var container = document.getElementById("dashScopeSegmented");
-    var seasons = allSeasonStartYears();
-    var valid = ["all"].concat(seasons.map(String));
-    if (valid.indexOf(dashScopeValue) === -1) dashScopeValue = "all";
-    var html = "<button type=\"button\" class=\"season-pill" + (dashScopeValue === "all" ? " is-active" : "") + "\" data-scope=\"all\">Depuis toujours</button>";
-    html += seasons.slice().reverse().map(function (s) {
-      var v = String(s);
-      return "<button type=\"button\" class=\"season-pill" + (dashScopeValue === v ? " is-active" : "") + "\" data-scope=\"" + v + "\">Saison " + seasonLabel(s) + "</button>";
-    }).join("");
-    container.innerHTML = html;
+    document.querySelectorAll("#dashScopeToggle .segmented__btn").forEach(function (b) {
+      b.classList.toggle("is-active", b.dataset.scope === dashScopeMode);
+    });
+    document.getElementById("dashScopeLabel").textContent = dashScopeMode === "season"
+      ? "Saison " + seasonLabel(currentSeasonStartYear())
+      : "Depuis toujours";
   }
 
-  document.getElementById("dashScopeSegmented").addEventListener("click", function (e) {
-    var btn = e.target.closest(".season-pill");
+  document.getElementById("dashScopeToggle").addEventListener("click", function (e) {
+    var btn = e.target.closest(".segmented__btn");
     if (!btn) return;
-    dashScopeValue = btn.dataset.scope;
+    dashScopeMode = btn.dataset.scope;
     renderDashScopeOptions();
     renderDashboard();
   });
 
   function getDashScope() {
-    return dashScopeValue === "all" ? { mode: "all" } : { mode: "season", startYear: parseInt(dashScopeValue, 10) };
+    return dashScopeMode === "all" ? { mode: "all" } : { mode: "season", startYear: currentSeasonStartYear() };
   }
 
   function renderDashboard() {
@@ -1631,18 +1745,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       weekData[i] = state.consumptions.filter(function (c) { return c.date === iso; }).reduce(function (s, c) { return s + c.kg; }, 0);
     }
     var weekTotalKg = weekData.reduce(function (a, b) { return a + b; }, 0);
-    document.getElementById("statRate").textContent = (Math.round((weekTotalKg / 7) * 10) / 10).toLocaleString("fr-FR") + " kg/j";
     document.getElementById("weekTotalChip").textContent = fmtSacs(weekTotalKg) + " sac(s)";
 
-    renderChart("chartWeek", "bar", WEEKDAY_LABELS, [{ label: "Kg brûlés", data: weekData, backgroundColor: "#ff8a3d" }]);
-
-    // Consommation mensuelle de la saison affichée (ou saison courante si "depuis toujours")
-    var seasonForChart = scope.mode === "season" ? scope.startYear : currentSeasonStartYear();
-    var monthlyData = new Array(12).fill(0);
-    state.consumptions.forEach(function (c) {
-      if (seasonStartYear(c.date) === seasonForChart) monthlyData[seasonMonthIndex(c.date)] += c.kg;
-    });
-    renderChart("chartMonthly", "bar", getSeasonMonthLabels(), [{ label: "Kg brûlés (" + seasonLabel(seasonForChart) + ")", data: monthlyData, backgroundColor: "#ff8a3d" }]);
+    renderBarChart("chartWeek", WEEKDAY_LABELS, weekData, "var(--accent-burn)");
   }
 
   // ---------- Statistiques ----------
@@ -1694,7 +1799,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         if (seasonStartYear(c.date) === startYear) monthlyData[seasonMonthIndex(c.date)] += c.kg / (state.settings.kgPerSack || 1);
       });
       monthlyData = monthlyData.map(function (v) { return Math.round(v * 10) / 10; });
-      renderChart("chartSeasonMonthly", "bar", getSeasonMonthLabels(), [{ label: "Sacs brûlés", data: monthlyData, backgroundColor: "#ff8a3d" }]);
+      renderBarChart("chartSeasonMonthly", getSeasonMonthLabels(), monthlyData, "var(--accent-burn)");
     } else {
       state.purchases.forEach(function (p) {
         if (seasonStartYear(p.date) === startYear) monthlyData[seasonMonthIndex(p.date)] += purchaseTotal(p);
@@ -1702,7 +1807,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       state.maintenances.forEach(function (m) {
         if (seasonStartYear(m.date) === startYear) monthlyData[seasonMonthIndex(m.date)] += m.cost || 0;
       });
-      renderChart("chartSeasonMonthly", "bar", getSeasonMonthLabels(), [{ label: "Dépenses (" + state.settings.currency + ")", data: monthlyData, backgroundColor: "#5b7cfa" }]);
+      renderBarChart("chartSeasonMonthly", getSeasonMonthLabels(), monthlyData, "var(--accent-purchase)");
     }
 
     var seasonMonthlyTotal = monthlyData.reduce(function (a, b) { return a + b; }, 0);
@@ -1718,32 +1823,27 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         var kg = state.consumptions.filter(function (c) { return seasonStartYear(c.date) === s; }).reduce(function (sum, c) { return sum + c.kg; }, 0);
         return Math.round((kg / (state.settings.kgPerSack || 1)) * 10) / 10;
       });
-      renderChart("chartMultiSeason", "bar", labels, [{ label: "Sacs brûlés", data: data, backgroundColor: "#ff8a3d" }]);
+      renderBarChart("chartMultiSeason", labels, data, "var(--accent-burn)", { showValue: true });
     } else {
       data = seasons.map(function (s) {
         return state.purchases.filter(function (p) { return seasonStartYear(p.date) === s; }).reduce(function (sum, p) { return sum + purchaseSacks(p); }, 0);
       });
-      renderChart("chartMultiSeason", "bar", labels, [{ label: "Sacs achetés", data: data, backgroundColor: "#5b7cfa" }]);
+      renderBarChart("chartMultiSeason", labels, data, "var(--accent-purchase)", { showValue: true });
     }
   }
 
-  // ---------- Graphiques (Chart.js) ----------
-  function renderChart(canvasId, type, labels, datasets) {
-    if (typeof Chart === "undefined") return;
-    var ctx = document.getElementById(canvasId).getContext("2d");
-    if (charts[canvasId]) charts[canvasId].destroy();
-    charts[canvasId] = new Chart(ctx, {
-      type: type,
-      data: { labels: labels, datasets: datasets },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: datasets.length > 1, labels: { color: "#9a95a6" } } },
-        scales: {
-          x: { ticks: { color: "#9a95a6" }, grid: { color: "rgba(255,255,255,0.05)" } },
-          y: { beginAtZero: true, ticks: { color: "#9a95a6" }, grid: { color: "rgba(255,255,255,0.05)" } }
-        }
-      }
-    });
+  // ---------- Graphiques en barres (CSS) ----------
+  function renderBarChart(containerId, labels, values, color, opts) {
+    opts = opts || {};
+    var max = Math.max.apply(null, values.concat([1]));
+    var container = document.getElementById(containerId);
+    container.innerHTML = values.map(function (v, i) {
+      var pct = Math.max(4, Math.round((v / max) * 100));
+      var valueLabel = opts.showValue ? "<div class=\"bar-chart__value\">" + v.toLocaleString("fr-FR") + "</div>" : "";
+      return "<div class=\"bar-chart__col\">" + valueLabel +
+        "<div class=\"bar-chart__bar\" style=\"height:" + pct + "%;background:" + color + ";\"></div>" +
+        "<div class=\"bar-chart__label\">" + labels[i] + "</div></div>";
+    }).join("");
   }
 
   // ---------- Rendu global ----------
